@@ -7,8 +7,8 @@
 //
 // speed of sound, assuming dx/dt=1;
 double e[9][2];            // basic
-const int x_size = 32;     // points among x
-const int y_size = 32;     // points among y
+const int x_size = 52;     // points among x
+const int y_size = 52;     // points among y
 const double R = 8.31/0.4; //
 const double gam = 1.66;   //
 double dx = 1;
@@ -170,6 +170,7 @@ int main(int argc, char **argv)
   FILE * velvecdat = fopen("tmp/cvel.dat", "w");
   FILE * pr = fopen("tmp/cP.dat", "w");
   FILE * tecplot = fopen("tmp/cTecplot.dat", "w");
+  FILE * arho;
   //
 
   // 1-dim arrays:
@@ -589,32 +590,16 @@ int main(int argc, char **argv)
         P[i][j] = rho_point[i][j]*T[i][j];
       }
     }
+    if (t%20==0) {
+      char animation_filename[50];
+      snprintf(animation_filename, 50, "results/%d.dat", t);
+      arho = fopen(animation_filename, "w");
+      for (int j=0; j<y_size; j++)
+        for (int i=0; i<x_size; i++)
+          fprintf(arho, "%d %d %f \n", i, j, rho_point[i][j]);
+      }
+  }
 
-  }
-  fprintf(debug, "Rho\n");
-  fprintf(debug, "\n");
-  for (int j=0; j<y_size; ++j){
-    for (int i=0; i<x_size; ++i){
-      fprintf(debug, "%f ", rho_point[i][j]);
-    }
-    fprintf(debug, "\n");
-  }
-  fprintf(debug, "\n\n\n");
-  fprintf(debug, "Vel\n");
-  for (int j=0; j<y_size; ++j){
-    for (int i=0; i<x_size; ++i){
-      fprintf(debug, "%f ", vel[2*j*x_size+2*i]);
-    }
-    fprintf(debug, "\n");
-  }
-  fprintf(debug, "\n\n\n");
-  fprintf(debug, "T\n");
-  for (int j=0; j<y_size; ++j){
-    for (int i=0; i<x_size; ++i){
-      fprintf(debug, "%f ", T[i][j]);
-    }
-    fprintf(debug, "\n");
-  }
   double * f_point;
   double * vel_point;
   double * g_point;
