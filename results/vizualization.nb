@@ -1,0 +1,140 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 11.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      5439,        132]
+NotebookOptionsPosition[      4935,        115]
+NotebookOutlinePosition[      5267,        130]
+CellTagsIndexPosition[      5224,        127]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[
+ RowBox[{"SetDirectory", "[", 
+  RowBox[{"StringJoin", "[", 
+   RowBox[{
+    RowBox[{"NotebookDirectory", "[", "]"}], ",", "\"\<\>\""}], "]"}], 
+  "]"}]], "Input",
+ CellLabel->"In[1]:=",ExpressionUUID->"e1b57ac8-ff4d-483b-bdad-b50db3886959"],
+
+Cell[BoxData["\<\"/home/mikhail/Dropbox/Researches/LBM/results\"\>"], "Output",
+ CellChangeTimes->{
+  3.740121490158463*^9, {3.740121630666128*^9, 3.740121644166604*^9}, 
+   3.7401217027779837`*^9, 3.7401218139705887`*^9, 3.7401218647871304`*^9, {
+   3.740121975363922*^9, 3.740121979424757*^9}, 3.740122078843285*^9, 
+   3.74012216506153*^9, {3.740122356806319*^9, 3.740122425177301*^9}, 
+   3.7401224784550657`*^9, 3.740122515804695*^9, 3.740122555603148*^9, 
+   3.740122888438682*^9, {3.740122924528764*^9, 3.740122932823964*^9}, {
+   3.74039179805735*^9, 3.740391830000434*^9}, 3.740392897293653*^9, 
+   3.740392981884088*^9, 3.740393016006043*^9, 3.7403930522536716`*^9, 
+   3.740393147054216*^9, 3.740393180033863*^9, 3.7403932758850107`*^9, 
+   3.740393350995426*^9, {3.7403933937076063`*^9, 3.74039341891901*^9}, {
+   3.740393604243259*^9, 3.740393671615054*^9}, {3.7403941506221323`*^9, 
+   3.740394165174347*^9}, {3.740394543361828*^9, 3.740394553635697*^9}, 
+   3.740394594243889*^9, {3.740394650193535*^9, 3.740394698088565*^9}, {
+   3.740394736931406*^9, 3.740394790771686*^9}, {3.740394930450757*^9, 
+   3.7403949832579*^9}, {3.74039512070704*^9, 3.740395174910487*^9}, {
+   3.740399016211779*^9, 3.740399051974388*^9}, {3.740506713058114*^9, 
+   3.7405067624937677`*^9}, 3.740506856441412*^9, {3.740506897880494*^9, 
+   3.7405069204519577`*^9}, {3.740506957477521*^9, 3.740507067799691*^9}, 
+   3.740507173055092*^9, 3.740507228137219*^9, {3.740507308772914*^9, 
+   3.740507328797811*^9}, {3.740507383776845*^9, 3.740507412552718*^9}, 
+   3.7406642277218122`*^9},
+ CellLabel->"Out[1]=",ExpressionUUID->"0cda9277-7e3d-48f6-abf4-9924c8de1845"]
+}, Open  ]],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"velx", " ", "=", " ", 
+   RowBox[{"Import", "[", 
+    RowBox[{"\"\<../tmp/cvel.dat\>\"", ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"\"\<Data\>\"", ",", " ", "All", ",", " ", "3"}], "}"}]}], 
+    "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"x", " ", "=", " ", 
+   RowBox[{"Import", "[", 
+    RowBox[{"\"\<../tmp/cvel.dat\>\"", ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"\"\<Data\>\"", ",", " ", "All", ",", " ", "1"}], "}"}]}], 
+    "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"y", " ", "=", " ", 
+   RowBox[{"Import", "[", 
+    RowBox[{"\"\<../tmp/cvel.dat\>\"", ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"\"\<Data\>\"", ",", " ", "All", ",", " ", "2"}], "}"}]}], 
+    "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"vely", " ", "=", " ", 
+   RowBox[{"Import", "[", 
+    RowBox[{"\"\<../tmp/cvel.dat\>\"", ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"\"\<Data\>\"", ",", " ", "All", ",", " ", "4"}], "}"}]}], 
+    "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"rho", " ", "=", " ", 
+   RowBox[{"Import", "[", "\"\<../tmp/crho.dat\>\"", "]"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{"ListDensityPlot", "[", 
+  RowBox[{"rho", ",", 
+   RowBox[{"PlotRange", "\[Rule]", "All"}]}], "]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"PlotV", " ", "=", " ", 
+   RowBox[{"Thread", "[", 
+    RowBox[{"{", 
+     RowBox[{"x", ",", "y", ",", 
+      RowBox[{"Sqrt", "[", 
+       RowBox[{
+        RowBox[{"velx", "*", "velx"}], " ", "+", " ", 
+        RowBox[{"vely", "*", "vely"}]}], "]"}]}], "}"}], "]"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{"ListDensityPlot", "[", 
+  RowBox[{"PlotV", ",", 
+   RowBox[{"PlotRange", "\[Rule]", "All"}]}], "]"}]}], "Input",
+ CellChangeTimes->{{3.740121499115365*^9, 3.740121562101996*^9}, {
+   3.740121613151184*^9, 3.7401216421894827`*^9}, 3.740121701932417*^9, {
+   3.740121969940032*^9, 3.7401219727560263`*^9}, {3.740122063177164*^9, 
+   3.740122184099071*^9}, {3.740122326232174*^9, 3.740122424467264*^9}, {
+   3.740122473188004*^9, 3.740122514687179*^9}, {3.740122546642273*^9, 
+   3.7401225546971188`*^9}, {3.740392868810975*^9, 3.740392894335265*^9}, {
+   3.740393050533061*^9, 3.7403931452236977`*^9}, {3.740393273790059*^9, 
+   3.740393274233511*^9}, {3.7406642237843122`*^9, 3.74066422600942*^9}},
+ CellLabel->"In[2]:=",ExpressionUUID->"6bd27ae3-9547-466c-bb79-04f13d746b2a"]
+},
+WindowSize->{958, 966},
+WindowMargins->{{4, Automatic}, {1, Automatic}},
+FrontEndVersion->"11.3 for Linux x86 (64-bit) (March 6, 2018)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 255, 6, 31, "Input",ExpressionUUID->"e1b57ac8-ff4d-483b-bdad-b50db3886959"],
+Cell[838, 30, 1656, 23, 35, "Output",ExpressionUUID->"0cda9277-7e3d-48f6-abf4-9924c8de1845"]
+}, Open  ]],
+Cell[2509, 56, 2422, 57, 193, "Input",ExpressionUUID->"6bd27ae3-9547-466c-bb79-04f13d746b2a"]
+}
+]
+*)
+

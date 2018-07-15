@@ -169,6 +169,7 @@ int main(int argc, char **argv)
   FILE * debug = fopen("tmp/cdebug.txt", "w");
   FILE * velvecdat = fopen("tmp/cvel.dat", "w");
   FILE * pr = fopen("tmp/cP.dat", "w");
+  FILE * tecplot = fopen("tmp/cTecplot.dat", "w");
   //
 
   // 1-dim arrays:
@@ -628,7 +629,9 @@ int main(int argc, char **argv)
       P[i][j] = rho_point[i][j]*T[i][j];
     }
   }
-
+  for (int j=1; j<y_size-1; j++)
+    for (int i=1; i<x_size-1; i++)
+      fprintf(tecplot, "%d %d %f %f %f %f %f %f \n", i, j, vel[i*2+j*2*x_size],vel[i*2+j*2*x_size+1], sqrt(vel[i*2+j*2*x_size]*vel[i*2+j*2*x_size]+vel[i*2+j*2*x_size+1]*vel[i*2+j*2*x_size+1]), T[i][j], rho_point[i][j], rho_point[i][j]*T[i][j]);
   for (int j=0; j<y_size; j++)
     for (int i=0; i<x_size; i++)
       fprintf(veldat, "%d %d %f \n", i, j, vel[i*2+j*2*x_size]);
