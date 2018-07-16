@@ -7,22 +7,18 @@
 //
 // speed of sound, assuming dx/dt=1;
 double e[9][2];            // basic
-const int x_size = 52;     // points among x
-const int y_size = 52;     // points among y
+const int x_size = 102;     // points among x
+const int y_size = 102;     // points among y
 const double R = 8.31/0.4; //
 const double gam = 1.66;   //
 double dx = 1;
 double dt = 1;
 double Pr = 1;
-float Kn=0.5;
+float Kn = 0.5;
 // Viscosity
 //
-double mu_powerlow(double temperature){              // \mu = A \cdot T ^ {omega}
-  double omega = 0.8;
-  double A = 1;       // A = mu_rest \cdot T_rest ^{-omega}
-
-  return A*pow(temperature,omega);
-}
+double mu_powerlow(double temperature){}              // \mu = A \cdot T ^ {omega}
+double A = 1;       // A = mu_rest \cdot T_rest ^{-omega}
 
 double mu_other(double temperature){
     return 0.; //Birdman?
@@ -32,7 +28,7 @@ double omega(double temperature, double rho)
 {
   //double nu = mu_powerlow(temperature)/dx/dx*dt; //*dx*dx/dt;
   double tau;
-  tau = sqrt(3*3.1415 / 8) *rho* Kn + 0.5;
+  tau = sqrt(3*3.1415 / 8) *rho* Kn*(x_size)*pow(temperature, 0.2) + 0.5;
   return 1./tau;
 
   // Check Palabos wiki, models, boundary review.
@@ -40,7 +36,7 @@ double omega(double temperature, double rho)
 double omega_g(double temperature, double rho)
 {
   //double nu = mu_powerlow(temperature)/dx/dx*dt; //*dx*dx/dt;
-  return  ((1./omega(temperature, rho)-0.5)/Pr + 0.5);
+  return  1./((1./omega(temperature, rho)-0.5)/Pr + 0.5);
   // Check Palabos wiki, models, boundary review.
 }
 
@@ -119,7 +115,7 @@ void equalibrum(double * f_eq, double * g_eq,double * u, double rho, double T) /
     float sc = scalar(e[k],temp);
     tmp = w[k] * (3 * sc / c + 4.5 * sc * sc / c / c - 1.5 * sq_module(temp)/c/c);
     *(f_eq+k) = w[k] * rho + rho * tmp;
-    *(g_eq+k) = R*T* *(f_eq+k);
+    *(g_eq+k) = T * R* *(f_eq+k);
   }
 }
 
@@ -133,19 +129,19 @@ int main(int argc, char **argv)
   e[1][0] = 1.;
   e[1][1] = 0.;
   e[2][0] = 0.;
-  e[2][1] = 1.;
+  e[2][1] = -1.;
   e[3][0] = -1.;
   e[3][1] = 0.;
   e[4][0] = 0.;
-  e[4][1] = -1.;
+  e[4][1] = 1.;
   e[5][0] = 1.;
-  e[5][1] = 1.;
+  e[5][1] = -1.;
   e[6][0] = -1.;
-  e[6][1] = 1.;
+  e[6][1] = -1.;
   e[7][0] = -1.;
-  e[7][1] = -1.;
+  e[7][1] = 1.;
   e[8][0] = 1.;
-  e[8][1] = -1.;
+  e[8][1] = 1.;
   //
   //  General constants
   //
@@ -154,6 +150,7 @@ int main(int argc, char **argv)
   double a = 0; // a = 0 for Maxwell and a = 1 for mirror
   double T1 = 1.0; // Left temperature
   double T2 = 1.5;
+  double Tw = 1.0*R;
   double P1 = 1.0;
   double P2 = 1.0;
   if (argc > 2){
@@ -173,6 +170,9 @@ int main(int argc, char **argv)
   FILE * arho;
   //
 
+  fprintf(tecplot, "TITLE = \"Example: Multi-Zone 2D Plot\"\n" );
+  fprintf(tecplot, "VARIABLES = \"X\", \"Y\", \"Vx\", \"Vy\", \"V\", \"T\", \"rho\", \"P\"\n");
+  fprintf(tecplot, "ZONE T=\"BIG ZONE\", I=%d, J=%d, F=POINT\n", x_size-2, y_size-2);
   // 1-dim arrays:
   int temp = x_size*y_size*9;
   double f[temp];
@@ -195,6 +195,7 @@ int main(int argc, char **argv)
   fprintf(debug, "time: %d\n", time);
   fprintf(debug, "Kn: %f\n", Kn);
   fprintf(debug, "x1 :%d\nx2: %d\ny1: %d\ny2: %d \n",x1 ,x2,y1,y2);
+
   //
   // Data:
   //
@@ -251,14 +252,34 @@ int main(int argc, char **argv)
     geq_point = g_eq  + x_size*(y_size-1)*9+j*9;
     gtemp_point = g_temp + x_size*(y_size-1)*9+j*9;
     vel_point = vel +  x_size*(y_size-1)*2+j*2;
-    *(vel_point) = 0.1;
-    *(vel_point+1) = 0;
+    *(vel_point) = -0.1;
+    *(vel_point+1) = 0.0;
     rho_point[j][1] = P2 / T1;//
     P[j][1] = P2;
     T[j][1] = T1;
     equalibrum(feq_point, geq_point, vel_point, rho_point[j][1], T[j][1]);
     *ftemp_point = 0.0;
   }
+  double * f_point = f;
+  double * feq_point = f_eq;
+  double * vel_point = vel;
+  double * ftemp_point = f_temp;
+  double * g_point  = g;
+  double * geq_point = g_eq;
+  double * gtemp_point = g_temp;
+  f_point = f  + (x_size)*(y_size/2)*9+x_size/2 * 9;
+  feq_point = f_eq  + (x_size)*(y_size/2)*9+x_size/2 * 9;
+  ftemp_point = f_temp + (x_size)*(y_size/2)*9+x_size/2 * 9;
+  g_point = g  + (x_size)*(y_size/22)*9+x_size/2 * 9;
+  geq_point = g_eq  + (x_size)*(y_size/2)*9+x_size/2 * 9;
+  gtemp_point = g_temp+ (x_size)*(y_size/2)*9+x_size/2 * 9;
+  vel_point = vel + (x_size)*(y_size/2)*2+x_size/2 * 2;
+  *(vel_point) = -0.0;
+  *(vel_point+1) = 0.0;
+  rho_point[x_size/2][y_size/2] = P2 / T1;//
+  P[x_size/2][y_size/2] = P2;
+  T[x_size/2][y_size/2] = T1;
+  equalibrum(feq_point, geq_point, vel_point, rho_point[x_size/2][y_size/2], T[x_size/2][y_size/2]);
 
   for (int i = 0; i < y_size; ++i){
     for (int j = 0; j < x_size; ++j){
@@ -470,21 +491,29 @@ int main(int argc, char **argv)
     f_point = f;
     feq_point = f_eq;
     *(f_point+8) = *(ftemp_point+6);
+    g_point = g;
+    *(g_point+8) = Tw * *(ftemp_point+6);
     // right-top
     ftemp_point = f_temp + x_size*9 - 9;
     f_point = f + x_size*9 - 9;
     feq_point = f_eq + x_size*9 - 9;
     *(f_point + 7) =  *(ftemp_point+5);
+    g_point = g+ x_size*9 - 9;
+    *(g_point+7) = Tw * *(ftemp_point+5);
     // left-bot:
     ftemp_point = f_temp + (y_size-1)*x_size*9;
     f_point = f + (y_size-1)*x_size*9;
     feq_point = f_eq + (y_size-1)*x_size*9;
     *(f_point+5) =  *(ftemp_point+7);
+    g_point = g + (y_size-1)*x_size*9;
+    *(g_point+5) = Tw * *(ftemp_point+7);
     // right-bot:
     ftemp_point = f_temp + (y_size-2)*x_size*9 + x_size*9 - 9;
     f_point = f + (y_size-1)*x_size*9 + x_size*9 - 9;
     feq_point = f_eq+ (y_size-1)*x_size*9 + x_size*9 - 9;
     *(f_point+6) = *(ftemp_point+8);
+    g_point = g + (y_size-1)*x_size*9 + x_size*9 - 9;
+    *(g_point+6) = Tw * *(ftemp_point+8);
     //
     // left and right
     //
@@ -500,9 +529,14 @@ int main(int argc, char **argv)
       *(f_point+5) += (1-a)* *(feq_point+5)*bal;
       *(f_point+1) += (1-a)* *(feq_point+1)*bal;
       *(f_point+8) += (1-a)* *(feq_point+8)*bal;
+      g_point = g + j*x_size*9;
+      *(g_point+5) = Tw *   *(f_point+5);
+      *(g_point+1) = Tw *   *(f_point+1);
+      *(g_point+8) = Tw *   *(f_point+8);
 
       ftemp_point = f_temp + j*x_size*9+ 9*(x_size-1);
       f_point = f + j*x_size*9+ 9*(x_size-1);
+      g_point = g + j*x_size*9+ 9*(x_size-1);
       feq_point = f_eq + j*x_size*9+ 9*(x_size-1);
       bal =(*(ftemp_point+5) + *(ftemp_point+1) + *(ftemp_point+8))/(*(feq_point+6)+*(feq_point+3)+*(feq_point+7));
       *(f_point+6) = a* *(ftemp_point+5);
@@ -511,6 +545,9 @@ int main(int argc, char **argv)
       *(f_point+6) += (1-a)* *(feq_point+6)*bal;
       *(f_point+3) += (1-a)* *(feq_point+3)*bal;
       *(f_point+7) += (1-a)* *(feq_point+7)*bal;
+      *(g_point+6) = Tw *   *(f_point+6);
+      *(g_point+3) = Tw *   *(f_point+3);
+      *(g_point+7) = Tw *   *(f_point+7);
     }
 
 
@@ -520,11 +557,15 @@ int main(int argc, char **argv)
     for (int i=1; i<x_size-1; ++i){
       ftemp_point = f_temp + i*9;
       f_point = f + i*9;
+      g_point = g + i*9;
       feq_point = f_eq + i*9;
       bal = (*(ftemp_point+2) + *(ftemp_point+5) + *(ftemp_point+6))/(*(feq_point+4)+*(feq_point+8)+*(feq_point+7));
       *(f_point+4)=bal * *(feq_point+4);
       *(f_point+8)=bal * *(feq_point+8);
       *(f_point+7)=bal * *(feq_point+7);
+      *(g_point+4)=Tw * *(f_point+4);
+      *(g_point+8)=Tw * *(f_point+8);
+      *(g_point+7)=Tw * *(f_point+7);
     }
 
 
@@ -535,6 +576,7 @@ int main(int argc, char **argv)
     for (int i=1; i<x_size-1; ++i){
       ftemp_point = f_temp  +(y_size-1)*x_size*9+ i*9;
       f_point = f +(y_size-1)*x_size*9+ i*9;
+      g_point = g +(y_size-1)*x_size*9+ i*9;
       feq_point = f_eq +(y_size-1)*x_size*9+ i*9;
       bal = (1-a)*(*(ftemp_point+4) + *(ftemp_point+8) + *(ftemp_point+7))/(*(feq_point+2)+*(feq_point+5)+*(feq_point+6));
       // transfer
@@ -544,6 +586,9 @@ int main(int argc, char **argv)
       *(f_point+2)+=bal * *(feq_point+2);
       *(f_point+5)+=bal * *(feq_point+5);
       *(f_point+6)+=bal * *(feq_point+6);
+      *(g_point+2)=Tw * *(f_point+2);
+      *(g_point+5)=Tw * *(f_point+5);
+      *(g_point+6)=Tw * *(f_point+6);
     }
 
     //
@@ -572,7 +617,7 @@ int main(int argc, char **argv)
         for (int k=0; k<9; ++k)
         {
           f[j*x_size*9 + i*9+k] = f_temp[j*x_size*9 + i*9+k] - omega(T[i][j], rho_point[i][j])*(f_temp[j*x_size*9 + i*9 + k] - f_eq[j*x_size*9 + i*9 + k]);
-          g[j*x_size*9 + i*9+k] = g_temp[j*x_size*9 + i*9+k] - omega_g(T[i][j], rho_point[i][j])*(g_temp[j*x_size*9 + i*9 + k] - g_eq[j*x_size*9 + i*9 + k]);
+          g[j*x_size*9 + i*9+k] = g_temp[j*x_size*9 + i*9+k] - omega(T[i][j], rho_point[i][j])*(g_temp[j*x_size*9 + i*9 + k] - g_eq[j*x_size*9 + i*9 + k]);
 
         }
       }
@@ -590,19 +635,15 @@ int main(int argc, char **argv)
         P[i][j] = rho_point[i][j]*T[i][j];
       }
     }
-    if (t%20==0) {
-      char animation_filename[50];
-      snprintf(animation_filename, 50, "results/%d.dat", t);
-      arho = fopen(animation_filename, "w");
-      for (int j=0; j<y_size; j++)
-        for (int i=0; i<x_size; i++)
-          fprintf(arho, "%d %d %f \n", i, j, rho_point[i][j]);
-      }
+    // if (t%50==0) {
+    //   char animation_filename[50];
+    //   snprintf(animation_filename, 50, "results/%d.dat", t);
+    //   arho = fopen(animation_filename, "w");
+    //   for (int j=0; j<y_size; j++)
+    //     for (int i=0; i<x_size; i++)
+    //       fprintf(arho, "%d %d %f \n", i, j, vel[i*2+j*2*x_size+1]);
+    //   }
   }
-
-  double * f_point;
-  double * vel_point;
-  double * g_point;
   for (int j = 1; j < y_size-1; ++j){
     for (int i = 1; i < x_size-1; ++i){
       f_point = f + j*x_size*9 + i*9;
