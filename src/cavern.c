@@ -7,9 +7,9 @@
 //
 // speed of sound, assuming dx/dt=1;
 double e[9][2];            // basic
-const int x_size = 102;     // points among x
-const int y_size = 102;     // points among y
-const double R = 8.31/0.4; //
+const int x_size = 52;     // points among x
+const int y_size = 52;     // points among y
+const double R = 8.31/0.04; //
 const double gam = 1.66;   //
 double dx = 1;
 double dt = 1;
@@ -28,7 +28,7 @@ double omega(double temperature, double rho)
 {
   //double nu = mu_powerlow(temperature)/dx/dx*dt; //*dx*dx/dt;
   double tau;
-  tau = sqrt(3*3.1415 / 8) *rho* Kn*(x_size-2)*pow(temperature, 0.2) + 0.5;
+  tau = sqrt(3*3.1415 / 8) /rho* Kn*(x_size-2)*pow(temperature, 0.2) + 0.5;
   return 1./tau;
 
   // Check Palabos wiki, models, boundary review.
@@ -269,6 +269,7 @@ int main(int argc, char **argv)
           double * feq_point = f_eq + i*x_size*9 + j*9;
           double * g_point = g + i*x_size*9 + j*9;
           double * geq_point = g_eq + i*x_size*9 + j*9;
+          double * vel_point = vel +  x_size*(y_size-1)*2+j*2;
           //  if (*(feq_point+k) < 0 ) fprintf(debug, "Probably mistake at point: %d %d, f_ %d is %f \n", i, j, k, *(feq_point+k));
           //f[i][j][k] = (1 + temp_tau)*f_eq[0][j][k] - tau * f_eq[i+1][j][k]; // Next in speed grid or ?
           *(f_point  + k) = *(feq_point+k);
@@ -380,7 +381,7 @@ int main(int argc, char **argv)
     ftemp_point = f_temp;
     f_point = f;
     *(ftemp_point + 9 * (x_size + 1) + 8) = *(f_point+8);
-    *(f_point+8) = *(ftemp_point+6);
+    //*(f_point+8) = *(ftemp_point+6);
     gtemp_point = g_temp;
     g_point = g;
     *(gtemp_point + 9 * (x_size + 1) + 8) =Tw* *(f_point+8);
@@ -389,7 +390,7 @@ int main(int argc, char **argv)
     ftemp_point = f_temp + x_size*9 - 9;
     f_point = f + x_size*9 - 9;
     *(ftemp_point + 9 * (x_size - 1) + 7) = *(f_point+7);
-    *(f_point + 7) = *(ftemp_point+5);
+  //  *(f_point + 7) = *(ftemp_point+5);
     gtemp_point = g_temp + x_size*9 - 9;
     g_point = g + x_size*9 - 9;
     *(gtemp_point + 9 * (x_size - 1) + 7) =Tw *  *(f_point+7);
@@ -465,12 +466,12 @@ int main(int argc, char **argv)
     ftemp_point = f_temp;
     f_point = f;
     feq_point = f_eq;
-    *(f_point+8) = *(ftemp_point+6);
+//    *(f_point+8) = *(ftemp_point+6);
     // right-top
     ftemp_point = f_temp + x_size*9 - 9;
     f_point = f + x_size*9 - 9;
     feq_point = f_eq + x_size*9 - 9;
-    *(f_point + 7) =  *(ftemp_point+5);
+  //  *(f_point + 7) =  *(ftemp_point+5);
     // left-bot:
     ftemp_point = f_temp + (y_size-1)*x_size*9;
     f_point = f + (y_size-1)*x_size*9;
@@ -560,7 +561,6 @@ int main(int argc, char **argv)
         g_point = g + j*x_size*9 + i*9;
         geq_point = g_eq + j*x_size*9 + i*9;
         vel_point = vel + j*x_size*2 + i*2;
-
         rho_point[i][j] = macro_rho(ftemp_point);
         macro_vel(vel_point, ftemp_point, rho_point[i][j], T[i][j]);
         T[i][j] = macro_temp(gtemp_point, rho_point[i][j]);
