@@ -168,6 +168,14 @@ int main(int argc, char **argv)
   FILE * pr = fopen("tmp/P.dat", "w");
   //
 
+  FILE * tecplot = fopen("tmp/cTecplot.dat", "w");
+  FILE * arho;
+     //
+
+  fprintf(tecplot, "TITLE = \"Example: Multi-Zone 2D Plot\"\n" );
+  fprintf(tecplot, "VARIABLES = \"X\", \"Y\", \"Vx\", \"Vy\", \"V\", \"T\", \"rho\", \"P\"\n");
+  fprintf(tecplot, "ZONE T=\"BIG ZONE\", I=%d, J=%d, F=POINT\n", x_size-2, y_size-2);
+
   // 1-dim arrays:
   int temp = x_size*y_size*9;
   double f[temp];
