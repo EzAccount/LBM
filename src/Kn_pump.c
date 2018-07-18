@@ -7,9 +7,10 @@
 //
 // speed of sound, assuming dx/dt=1;
 double e[9][2];            // basic
-const int x_size = 202;     // points among x
+const int x_size = 102;     // points among x
 const int y_size = 52;     // points among y
-const double R = 8.31/0.4; //
+int h = 5;
+const double R = 8.31/0.04; //
 const double gam = 1.66;   //
 double dx = 1;
 double dt = 1;
@@ -30,9 +31,9 @@ double mu_other(double temperature){
 
 double omega(double temperature, double rho)
 {
-  //double nu = mu_powerlow(temperature)/dx/dx*dt; //*dx*dx/dt;
-  return 1./Kn; // report930
-  // Check Palabos wiki, models, boundary review.
+  double tau;
+  tau = sqrt(3*3.1415 / 8) /rho* Kn*h*pow(temperature, 0.7) + 0.5;
+  return 1./tau;
 }
 double omega_g(double temperature, double rho)
 {
@@ -83,7 +84,7 @@ double macro_rho(double* f_point){  // mass density as sum of destribution
 
 double macro_temp(double* g_point, double rho)
 {
-  double result;
+  double result=0;
   for(int k=0; k<9; ++k){
     result+= *(g_point+k);
   }
@@ -104,7 +105,7 @@ void macro_vel(double * u_point,double * f_point, double rho, double temperature
 void equalibrum(double * f_eq, double * g_eq,double * u, double rho, double T) // f^eq
 {
   double control_sum = 0;
-  double c = sqrt(R*T);
+  double c = 1.;
   double temp[2];
   temp[0] = *u;
   temp[1] = *(u+1);
@@ -138,7 +139,7 @@ int main(int argc, char **argv)
   e[5][0] = 1.;
   e[5][1] = -1.;
   e[6][0] = -1.;
-  e[6][1] = 1.;
+  e[6][1] = -1.;
   e[7][0] = -1.;
   e[7][1] = 1.;
   e[8][0] = 1.;
@@ -190,7 +191,7 @@ int main(int argc, char **argv)
   double P[x_size][y_size];
   double rho_point[x_size][y_size];
   int x1,x2,y1,y2;
-  int h = 5;
+
   x1 = x_size/4;
   x2 = 3*x_size / 4;
   y1 = (y_size/2) - h;
@@ -360,12 +361,12 @@ int main(int argc, char **argv)
         ftemp_point = f_temp + 9*j*x_size + 9*i;
         f_point = f + 9*j*x_size + 9*i;
         *(ftemp_point) = *(f_point);
+        *(ftemp_point - 9 * (x_size + 1) + 6) = *(f_point+6);
         *(ftemp_point + 9 + 1) = *(f_point+1);
         *(ftemp_point - 9 * x_size+2) = *(f_point+2);
         *(ftemp_point - 9 + 3) = *(f_point+3);
         *(ftemp_point + 9 * x_size + 4) = *(f_point+4);
         *(ftemp_point - 9 * (x_size - 1) + 5) = *(f_point+5);
-        *(ftemp_point - 9 * (x_size + 1) + 6) = *(f_point+6);
         *(ftemp_point + 9 * (x_size - 1) + 7) = *(f_point+7);
         *(ftemp_point + 9 * (x_size + 1) + 8) = *(f_point+8);
         gtemp_point = g_temp + 9*j*x_size + 9*i;
@@ -448,9 +449,9 @@ int main(int argc, char **argv)
       g_point = g + i*9;
       vel_point = vel + i * 2;
       // transfer
-      *(gtemp_point + 9 * x_size + 4) =Tw * *(f_point+4);
-      *(gtemp_point + 9 * (x_size - 1) + 7) =Tw *  *(f_point+7);
-      *(gtemp_point + 9 * (x_size + 1) + 8) = Tw * *(f_point+8);
+      *(gtemp_point + 9 * x_size + 4) =R*T[i][0] * *(f_point+4);
+      *(gtemp_point + 9 * (x_size - 1) + 7) =R*T[i][0] *  *(f_point+7);
+      *(gtemp_point + 9 * (x_size + 1) + 8) = R*T[i][0] * *(f_point+8);
     }
     for (int i=x1+1; i<x2; ++i){
       ftemp_point = f_temp + i*9 + 9*x_size*y1;
@@ -464,9 +465,9 @@ int main(int argc, char **argv)
       g_point = g + i*9 + 9*x_size*y1;
       vel_point = vel + i * 2 + 2*x_size*y1;
       // transfer
-      *(gtemp_point + 9 * x_size + 4) =Tw * *(f_point+4);
-      *(gtemp_point + 9 * (x_size - 1) + 7) =Tw *  *(f_point+7);
-      *(gtemp_point + 9 * (x_size + 1) + 8) =Tw *  *(f_point+8);
+      *(gtemp_point + 9 * x_size + 4) =R*T[i][y1] * *(f_point+4);
+      *(gtemp_point + 9 * (x_size - 1) + 7) =R*T[i][y1] *  *(f_point+7);
+      *(gtemp_point + 9 * (x_size + 1) + 8) =R*T[i][y1] *  *(f_point+8);
     }
     for (int i=x2+1; i<x_size-1; ++i){
       ftemp_point = f_temp + i*9;
@@ -480,9 +481,9 @@ int main(int argc, char **argv)
       g_point = g + i*9;
       vel_point = vel + i * 2;
       // transfer
-      *(gtemp_point + 9 * x_size + 4) =Tw* *(f_point+4);
-      *(gtemp_point + 9 * (x_size - 1) + 7) =Tw* *(f_point+7);
-      *(gtemp_point + 9 * (x_size + 1) + 8) =Tw* *(f_point+8);
+      *(gtemp_point + 9 * x_size + 4) =R*T[i][0]* *(f_point+4);
+      *(gtemp_point + 9 * (x_size - 1) + 7) =R*T[i][0]* *(f_point+7);
+      *(gtemp_point + 9 * (x_size + 1) + 8) =R*T[i][0]* *(f_point+8);
     }
 
     // Corners:
@@ -493,7 +494,7 @@ int main(int argc, char **argv)
     *(f_point+8) = *(ftemp_point+6);
     gtemp_point = g_temp;
     g_point = g;
-    *(gtemp_point + 9 * (x_size + 1) + 8) =Tw* *(f_point+8);
+    *(gtemp_point + 9 * (x_size + 1) + 8) =R*T[0][0]* *(f_point+8);
 
     // top x1:
     ftemp_point = f_temp + x1*9;
@@ -502,7 +503,7 @@ int main(int argc, char **argv)
     *(f_point+7) = *(ftemp_point+5);
     gtemp_point = g_temp + x1*9;
     g_point = g + x1*9;
-    *(gtemp_point + 9 * (x_size - 1) + 7) = Tw* *(f_point+7);
+    *(gtemp_point + 9 * (x_size - 1) + 7) = R*T[x1][0]* *(f_point+7);
 
     // top x2:
     ftemp_point = f_temp + x2*9;
@@ -511,7 +512,7 @@ int main(int argc, char **argv)
     *(f_point+8) = *(ftemp_point+6);
     gtemp_point = g_temp + x2*9;
     g_point = g + x2*9;
-    *(gtemp_point + 9 * (x_size + 1) + 8) = Tw* *(f_point+8);
+    *(gtemp_point + 9 * (x_size + 1) + 8) = R*T[x2][0]* *(f_point+8);
 
     // right-top
     ftemp_point = f_temp + x_size*9 - 9;
@@ -520,7 +521,7 @@ int main(int argc, char **argv)
     *(f_point + 7) = *(ftemp_point+5);
     gtemp_point = g_temp + x_size*9 - 9;
     g_point = g + x_size*9 - 9;
-    *(gtemp_point + 9 * (x_size - 1) + 7) =Tw*  *(f_point+7);
+    *(gtemp_point + 9 * (x_size - 1) + 7) =R*T[x_size-1][0]*  *(f_point+7);
 
     // bottom
     for (int i=1; i<x1; ++i){
@@ -531,9 +532,9 @@ int main(int argc, char **argv)
       *(ftemp_point - 9 * (x_size - 1) + 5) = *(f_point+5);
       *(ftemp_point - 9 * (x_size + 1) + 6) = *(f_point+6);
       gtemp_point = g_temp  +(y_size-1)*x_size*9+ i*9;
-      *(gtemp_point - 9 * x_size + 2) =Tw* *(f_point+2);
-      *(gtemp_point - 9 * (x_size - 1) + 5) =Tw* *(f_point+5);
-      *(gtemp_point - 9 * (x_size + 1) + 6) =Tw* *(f_point+6);
+      *(gtemp_point - 9 * x_size + 2) =R*T[i][y_size-1]* *(f_point+2);
+      *(gtemp_point - 9 * (x_size - 1) + 5) =R*T[i][y_size-1]* *(f_point+5);
+      *(gtemp_point - 9 * (x_size + 1) + 6) =R*T[i][y_size-1]* *(f_point+6);
     }
     for (int i=x1+1; i<x2; ++i){
       ftemp_point = f_temp  + y2*x_size*9+ i*9;
@@ -545,9 +546,9 @@ int main(int argc, char **argv)
       gtemp_point = g_temp  + y2*x_size*9+ i*9;
       g_point = g +y2*x_size*9+ i*9;
       // transfer
-      *(gtemp_point - 9 * x_size + 2) =Tw* *(f_point+2);
-      *(gtemp_point - 9 * (x_size - 1) + 5) =Tw* *(f_point+5);
-      *(gtemp_point - 9 * (x_size + 1) + 6) =Tw* *(f_point+6);
+      *(gtemp_point - 9 * x_size + 2) =R*T[i][y2]* *(f_point+2);
+    *(gtemp_point - 9 * (x_size - 1) + 5) =R*T[i][y2]* *(f_point+5);
+      *(gtemp_point - 9 * (x_size + 1) + 6) =R*T[i][y2]* *(f_point+6);
     }
     for (int i=x2+1; i<x_size-1; ++i){
       ftemp_point = f_temp + i*9 + (y_size-1)*(x_size)*9;
@@ -557,9 +558,9 @@ int main(int argc, char **argv)
       *(ftemp_point - 9 * (x_size + 1) + 6) = *(f_point+6);
       gtemp_point = g_temp + i*9 + (y_size-1)*(x_size)*9;
       g_point = g + i*9 + (y_size-1)*(x_size)*9;
-      *(gtemp_point - 9 * x_size + 2) =Tw* *(f_point+2);
-      *(gtemp_point - 9 * (x_size - 1) + 5) =Tw* *(f_point+5);
-      *(gtemp_point - 9 * (x_size + 1) + 6) =Tw* *(f_point+6);
+      *(gtemp_point - 9 * x_size + 2) =R*T[i][y_size-1]* *(f_point+2);
+      *(gtemp_point - 9 * (x_size - 1) + 5) =R*T[i][y_size-1]* *(f_point+5);
+      *(gtemp_point - 9 * (x_size + 1) + 6) =R*T[i][y_size-1]* *(f_point+6);
     }
 
     //Corners:
@@ -569,28 +570,28 @@ int main(int argc, char **argv)
     *(ftemp_point - 9 * (x_size - 1) + 5) = *(f_point+5);
     gtemp_point = g_temp + (y_size-1)*x_size*9;
     g_point = g + (y_size-1)*x_size*9;
-    *(gtemp_point - 9 * (x_size - 1) + 5) = Tw* *(f_point+5);
+    *(gtemp_point - 9 * (x_size - 1) + 5) = R*T[0][y_size-1]* *(f_point+5);
     //right-bot:
     ftemp_point = f_temp + (y_size-1)*x_size*9 + x_size*9 - 9;
     f_point = f + (y_size-1)*x_size*9 + x_size*9 - 9;
     *(ftemp_point - 9 * (x_size + 1) + 6) = *(f_point+6);
     gtemp_point = g_temp + (y_size-1)*x_size*9 + x_size*9 - 9;
     g_point = g + (y_size-1)*x_size*9 + x_size*9 - 9;
-    *(gtemp_point - 9 * (x_size + 1) + 6) =Tw* *(f_point+6);
+    *(gtemp_point - 9 * (x_size + 1) + 6) =R*T[x_size-1][y_size-1]* *(f_point+6);
     // x2 - bot
     ftemp_point = f_temp + (y_size-1)*x_size*9 + 9*x2;
     f_point = f + (y_size-1)*x_size*9 + 9*x2;
     *(ftemp_point - 9 * (x_size - 1) + 5) = *(f_point+5);
     gtemp_point = g_temp + (y_size-1)*x_size*9 + 9*x2;
     g_point = g + (y_size-1)*x_size*9 + 9*x2;
-    *(gtemp_point - 9 * (x_size - 1) + 5) =Tw* *(f_point+5);
+    *(gtemp_point - 9 * (x_size - 1) + 5) =R*T[x2][y_size-1]* *(f_point+5);
     // x1 - bot
     ftemp_point = f_temp + (y_size-1)*x_size*9 + 9*x1;
     f_point = f + (y_size-1)*x_size*9 + 9*x1;
     *(ftemp_point - 9 * (x_size + 1) + 6) = *(f_point+6);
     gtemp_point = g_temp + (y_size-1)*x_size*9 + 9*x1;
     g_point = g + (y_size-1)*x_size*9 + 9*x1;
-    *(gtemp_point - 9 * (x_size + 1) + 6) =Tw* *(f_point+6);
+    *(gtemp_point - 9 * (x_size + 1) + 6) =R*T[x1][y_size-1]* *(f_point+6);
 
     // inside coreners:
     f_point = f + y1*x_size*9 + x1*9;
@@ -673,10 +674,10 @@ int main(int argc, char **argv)
       *(ftemp_point - 9 + 3) = *(f_point+3);
       *(ftemp_point - 9 * (x_size + 1) + 6) = *(f_point + 6);
       *(ftemp_point + 9 * (x_size - 1) + 7) = *(f_point + 7);
-      ftemp_point = g_temp + j*x_size*9+ 9*(x_size-1);
-      *(ftemp_point - 9 + 3) =R*T[x_size-1][j]* *(f_point+3);
-      *(ftemp_point - 9 * (x_size + 1) + 6) =R*T[x_size-1][j]* *(f_point + 6);
-      *(ftemp_point + 9 * (x_size - 1) + 7) =R*T[x_size-1][j]* *(f_point + 7);
+      gtemp_point = g_temp + j*x_size*9+ 9*(x_size-1);
+      *(gtemp_point - 9 + 3) =R*T[x_size-1][j]* *(f_point+3);
+      *(gtemp_point - 9 * (x_size + 1) + 6) =R*T[x_size-1][j]* *(f_point + 6);
+      *(gtemp_point + 9 * (x_size - 1) + 7) =R*T[x_size-1][j]* *(f_point + 7);
     }
 
     // x1 - right:
@@ -686,10 +687,10 @@ int main(int argc, char **argv)
       *(ftemp_point - 9 + 3) = *(f_point + 3);
       *(ftemp_point - 9 * (x_size + 1) + 6) = *(f_point+6);
       *(ftemp_point + 9 * (x_size - 1) + 7) = *(f_point+7);
-      ftemp_point = g_temp + x1*9 + j*x_size*9;
-      *(ftemp_point - 9 + 3) =R*T[x1][j]* *(f_point + 3);
-      *(ftemp_point - 9 * (x_size + 1) + 6) =R*T[x1][j]* *(f_point+6);
-      *(ftemp_point + 9 * (x_size - 1) + 7) =R*T[x1][j]* *(f_point+7);
+      gtemp_point = g_temp + x1*9 + j*x_size*9;
+      *(gtemp_point - 9 + 3) =R*T[x1][j]* *(f_point + 3);
+      *(gtemp_point - 9 * (x_size + 1) + 6) =R*T[x1][j]* *(f_point+6);
+      *(gtemp_point + 9 * (x_size - 1) + 7) =R*T[x1][j]* *(f_point+7);
     }
     for (int j = y2+1; j < y_size-1; ++j){
       ftemp_point = f_temp + x1*9 + j*x_size*9;
@@ -1001,7 +1002,7 @@ int main(int argc, char **argv)
         for (int k=0; k<9; ++k)
         {
           f[j*x_size*9 + i*9+k] = f_temp[j*x_size*9 + i*9+k] - omega(T[i][j], rho_point[i][j])*(f_temp[j*x_size*9 + i*9 + k] - f_eq[j*x_size*9 + i*9 + k]);
-          g[j*x_size*9 + i*9+k] = g_temp[j*x_size*9 + i*9+k] - omega_g(T[i][j], rho_point[i][j])*(g_temp[j*x_size*9 + i*9 + k] - g_eq[j*x_size*9 + i*9 + k]);
+          g[j*x_size*9 + i*9+k] = g_temp[j*x_size*9 + i*9+k] - omega(T[i][j], rho_point[i][j])*(g_temp[j*x_size*9 + i*9 + k] - g_eq[j*x_size*9 + i*9 + k]);
 
         }
       }
@@ -1014,7 +1015,7 @@ int main(int argc, char **argv)
         for (int k=0; k<9; ++k)
         {
           f[j*x_size*9 + i*9+k] = f_temp[j*x_size*9 + i*9+k] - omega(T[i][j], rho_point[i][j])*(f_temp[j*x_size*9 + i*9 + k] - f_eq[j*x_size*9 + i*9 + k]);
-          g[j*x_size*9 + i*9+k] = g_temp[j*x_size*9 + i*9+k] - omega_g(T[i][j], rho_point[i][j])*(g_temp[j*x_size*9 + i*9 + k] - g_eq[j*x_size*9 + i*9 + k]);
+          g[j*x_size*9 + i*9+k] = g_temp[j*x_size*9 + i*9+k] - omega(T[i][j], rho_point[i][j])*(g_temp[j*x_size*9 + i*9 + k] - g_eq[j*x_size*9 + i*9 + k]);
         }
       }
     }
@@ -1025,7 +1026,7 @@ int main(int argc, char **argv)
         for (int k=0; k<9; ++k)
         {
           f[j*x_size*9 + i*9+k] = f_temp[j*x_size*9 + i*9+k] - omega(T[i][j], rho_point[i][j])*(f_temp[j*x_size*9 + i*9 + k] - f_eq[j*x_size*9 + i*9 + k]);
-          g[j*x_size*9 + i*9+k] = g_temp[j*x_size*9 + i*9+k] - omega_g(T[i][j], rho_point[i][j])*(g_temp[j*x_size*9 + i*9 + k] - g_eq[j*x_size*9 + i*9 + k]);
+          g[j*x_size*9 + i*9+k] = g_temp[j*x_size*9 + i*9+k] - omega(T[i][j], rho_point[i][j])*(g_temp[j*x_size*9 + i*9 + k] - g_eq[j*x_size*9 + i*9 + k]);
 
 
         }
