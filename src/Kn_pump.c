@@ -32,7 +32,7 @@ double mu_other(double temperature){
 double omega(double temperature, double rho)
 {
   double tau;
-  tau = sqrt(3*3.1415 / 8) /rho* Kn*h*pow(temperature, 0.7) + 0.5;
+  tau = sqrt(3*3.1415 / 8) /rho* Kn*h*pow(temperature, 0.2) + 0.5;
   return 1./tau;
 }
 double omega_g(double temperature, double rho)
@@ -155,7 +155,7 @@ int main(int argc, char **argv)
   int time = 50;// steps in time
   double a = 0; // a = 0 for Maxwell and a = 1 for mirror
   double T1 = 1.0; // Left temperature
-  double T2 = 1.3;
+  double T2 = 2.0;
   double P1 = 1.0;
   double P2 = 1.0;
   if (argc > 2){
@@ -173,7 +173,7 @@ int main(int argc, char **argv)
   FILE * pr = fopen("tmp/P.dat", "w");
   //
 
-  FILE * tecplot = fopen("tmp/cTecplot.dat", "w");
+  FILE * tecplot = fopen("tmp/Tecplot.dat", "w");
   FILE * arho;
      //
 
@@ -221,8 +221,7 @@ int main(int argc, char **argv)
   for (int i = 0; i < y_size; ++i){
     double * f_point = f;
     double * feq_point = f_eq;
-    double * vel_point = vel;
-    double * ftemp_point = f_temp;
+    double * vel_point = vel;    double * ftemp_point = f_temp;
     double * g_point  = g;
     double * geq_point = g_eq;
     double * gtemp_point = g_temp;
@@ -1153,5 +1152,8 @@ int main(int argc, char **argv)
   for (int j=1; j<y_size-1; j++)
     for (int i=1; i<x_size-1; i++)
       fprintf(Tdat, "%d %d %f \n", i, j, T[i][j]);
+  for (int j=1; j<y_size-1; j++)
+    for (int i=1; i<x_size-1; i++)
+      fprintf(debug, "%d %d %f \n", i, j, f_eq[9*x_size*j + i*9 +6]);
     return 0;
 }
