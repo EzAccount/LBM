@@ -80,17 +80,18 @@ double macro_rho(double* f_point){  // mass density as sum of destribution
   return result;
 }
 
-double macro_temp(double* g_point, double rho, double * u)
+double macro_temp(double* f_point, double rho, double * u)
 {
-  double result=0;
-  double temp[2];
-  temp[0] = *u;
-  temp[1] = *(u+1);
-  double sc = sq_module(temp);
+  double result = 0;
+  double tmp[2];
+  double sq;
   for(int k=0; k<9; ++k){
-    result+= *(g_point+k);
+    tmp[0] = e[k][0] - *(u);
+    tmp[1] = e[k][1] - *(u+1);
+    sq = sq_module(tmp);
+    result+= sq * *(f_point+k);
   }
-  return (result/rho/R+sc/2);
+  return result/2*3/rho;
 }
 void macro_vel(double * u_point,double * f_point, double rho, double temperature) // speed
 {
@@ -192,8 +193,8 @@ int main(int argc, char **argv)
   double rho_point[x_size][y_size];
   int x1,x2,y1,y2;
   int h = 5;
-  x1 = x_size/4;
-  x2 = 3*x_size / 4;
+  x1 = x_size/5;
+  x2 = 4*x_size / 5;
   y1 = (y_size/2) - h;
   y2 = (y_size/2) + h;
   fprintf(debug, "time: %d\n", time);
@@ -567,7 +568,7 @@ int main(int argc, char **argv)
         vel_point = vel + j*x_size*2 + i*2;
         rho_point[i][j] = macro_rho(ftemp_point);
         macro_vel(vel_point, ftemp_point, rho_point[i][j], T[i][j]);
-        T[i][j] = macro_temp(gtemp_point, rho_point[i][j], vel_point);
+        T[i][j] = macro_temp(ftemp_point, rho_point[i][j], vel_point);
         P[i][j] = rho_point[i][j]*T[i][j];
         equalibrum(feq_point, geq_point, vel_point,rho_point[i][j], T[i][j]);
       }
@@ -593,7 +594,7 @@ int main(int argc, char **argv)
         vel_point = vel + j*x_size*2 + i*2;
         rho_point[i][j] = macro_rho(f_point);
         macro_vel(vel_point, f_point, rho_point[i][j], T[i][j]);
-        T[i][j] = macro_temp(gtemp_point, rho_point[i][j], vel_point);
+        T[i][j] = macro_temp(ftemp_point, rho_point[i][j], vel_point);
         P[i][j] = rho_point[i][j]*T[i][j];
       }
     }
@@ -620,7 +621,7 @@ int main(int argc, char **argv)
       vel_point = vel + j*x_size*2 + i*2;
       rho_point[i][j] = macro_rho(f_point);
       macro_vel(vel_point, f_point, rho_point[i][j], T[i][j]);
-      T[i][j] =  macro_temp(g_point, rho_point[i][j], vel_point);
+      T[i][j] =  macro_temp(f_point, rho_point[i][j], vel_point);
       P[i][j] = rho_point[i][j]*T[i][j];
     }
   }
