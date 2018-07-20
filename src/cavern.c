@@ -190,6 +190,7 @@ int main(int argc, char **argv)
   double T[x_size][y_size];
   double P[x_size][y_size];
   double rho_point[x_size][y_size];
+  printf("%p\n", f_temp  + x_size*(y_size-1)*9-18+8);
   int x1,x2,y1,y2;
   int h = 5;
   x1 = x_size/4;
@@ -334,8 +335,8 @@ int main(int argc, char **argv)
     //
     // inside:
     //
-    for (int j = 1; j < y_size-1; ++j){
-      for (int i = 1; i < x_size-1; ++i){
+    for (int j = 1; j < y_size-1; j++){
+      for (int i = 1; i < x_size-1; i++){
         ftemp_point = f_temp + 9*j*x_size + 9*i;
         f_point = f + 9*j*x_size + 9*i;
         *(ftemp_point) = *(f_point);

@@ -92,7 +92,7 @@ double macro_temp(double* g_point, double rho, double * u)
   for(int k=0; k<9; ++k){
     result+= *(g_point+k);
   }
-  return (result-sc/2)/rho/R;
+  return result/rho/R;
 }
 void macro_vel(double * u_point,double * f_point, double rho, double temperature) // speed
 {
@@ -109,7 +109,7 @@ void macro_vel(double * u_point,double * f_point, double rho, double temperature
 void equalibrum(double * f_eq, double * g_eq,double * u, double rho, double T) // f^eq
 {
   double control_sum = 0;
-  double c = sqrt(T);
+  double c = T;
   double temp[2];
   temp[0] = *u;
   temp[1] = *(u+1);
@@ -1005,7 +1005,7 @@ int main(int argc, char **argv)
         for (int k=0; k<9; ++k)
         {
           f[j*x_size*9 + i*9+k] = f_temp[j*x_size*9 + i*9+k] - omega(T[i][j], rho_point[i][j])*(f_temp[j*x_size*9 + i*9 + k] - f_eq[j*x_size*9 + i*9 + k]);
-          g[j*x_size*9 + i*9+k] = g_temp[j*x_size*9 + i*9+k] - omega(T[i][j], rho_point[i][j])*(g_temp[j*x_size*9 + i*9 + k] - g_eq[j*x_size*9 + i*9 + k]);
+          g[j*x_size*9 + i*9+k] = g_temp[j*x_size*9 + i*9+k] - omega_g(T[i][j], rho_point[i][j])*(g_temp[j*x_size*9 + i*9 + k] - g_eq[j*x_size*9 + i*9 + k]);
 
         }
       }
@@ -1018,7 +1018,7 @@ int main(int argc, char **argv)
         for (int k=0; k<9; ++k)
         {
           f[j*x_size*9 + i*9+k] = f_temp[j*x_size*9 + i*9+k] - omega(T[i][j], rho_point[i][j])*(f_temp[j*x_size*9 + i*9 + k] - f_eq[j*x_size*9 + i*9 + k]);
-          g[j*x_size*9 + i*9+k] = g_temp[j*x_size*9 + i*9+k] - omega(T[i][j], rho_point[i][j])*(g_temp[j*x_size*9 + i*9 + k] - g_eq[j*x_size*9 + i*9 + k]);
+          g[j*x_size*9 + i*9+k] = g_temp[j*x_size*9 + i*9+k] - omega_g(T[i][j], rho_point[i][j])*(g_temp[j*x_size*9 + i*9 + k] - g_eq[j*x_size*9 + i*9 + k]);
         }
       }
     }
@@ -1029,7 +1029,7 @@ int main(int argc, char **argv)
         for (int k=0; k<9; ++k)
         {
           f[j*x_size*9 + i*9+k] = f_temp[j*x_size*9 + i*9+k] - omega(T[i][j], rho_point[i][j])*(f_temp[j*x_size*9 + i*9 + k] - f_eq[j*x_size*9 + i*9 + k]);
-          g[j*x_size*9 + i*9+k] = g_temp[j*x_size*9 + i*9+k] - omega(T[i][j], rho_point[i][j])*(g_temp[j*x_size*9 + i*9 + k] - g_eq[j*x_size*9 + i*9 + k]);
+          g[j*x_size*9 + i*9+k] = g_temp[j*x_size*9 + i*9+k] - omega_g(T[i][j], rho_point[i][j])*(g_temp[j*x_size*9 + i*9 + k] - g_eq[j*x_size*9 + i*9 + k]);
 
 
         }
