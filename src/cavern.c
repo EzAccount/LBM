@@ -116,7 +116,7 @@ void equalibrum(double * f_eq, double * g_eq,double * u, double rho, double T) /
   for (int k = 0; k < 9; ++k)
   {
     double tmp;
-    float sc = scalar(e[k],temp);
+    double sc = scalar(e[k],temp);
     tmp = w[k] * (3 * sc / c + 4.5 * sc * sc / c / c - 1.5 * sq_module(temp)/c/c);
     *(f_eq+k) = w[k] * rho + rho * tmp;
     *(g_eq+k) = T * R* *(f_eq+k);
@@ -190,7 +190,13 @@ int main(int argc, char **argv)
   double T[x_size][y_size];
   double P[x_size][y_size];
   double rho_point[x_size][y_size];
+  printf("%p\n", f_temp  + x_size*(y_size-1)*9-18+6);
   printf("%p\n", f_temp  + x_size*(y_size-1)*9-18+8);
+  printf("%p\n", f  + x_size*(y_size-1)*9+(x_size-1)*9+6);
+  printf("%p\n", f  + x_size*(y_size-1)*9+(x_size-1)*9+8);
+
+
+
   int x1,x2,y1,y2;
   int h = 5;
   x1 = x_size/4;
@@ -481,13 +487,13 @@ int main(int argc, char **argv)
     ftemp_point = f_temp + (y_size-1)*x_size*9;
     f_point = f + (y_size-1)*x_size*9;
     feq_point = f_eq + (y_size-1)*x_size*9;
-    *(f_point+5) =  *(ftemp_point+7);
+    //*(f_point+5) =  *(ftemp_point+7);
 
     // right-bot:
     ftemp_point = f_temp + (y_size-2)*x_size*9 + x_size*9 - 9;
     f_point = f + (y_size-1)*x_size*9 + x_size*9 - 9;
     feq_point = f_eq+ (y_size-1)*x_size*9 + x_size*9 - 9;
-    *(f_point+6) = *(ftemp_point+8);
+    //*(f_point+6) = *(ftemp_point+8);
 
     //
     // left and right
@@ -579,8 +585,10 @@ int main(int argc, char **argv)
       for (int i = 1; i < x_size-1; ++i){
         for (int k=0; k<9; ++k)
         {
-          f[j*x_size*9 + i*9+k] = f_temp[j*x_size*9 + i*9+k] - omega(T[i][j], rho_point[i][j])*(f_temp[j*x_size*9 + i*9 + k] - f_eq[j*x_size*9 + i*9 + k]);
-          g[j*x_size*9 + i*9+k] = g_temp[j*x_size*9 + i*9+k] - omega(T[i][j], rho_point[i][j])*(g_temp[j*x_size*9 + i*9 + k] - g_eq[j*x_size*9 + i*9 + k]);
+          f[j*x_size*9 + i*9+k] = f_temp[j*x_size*9 + i*9+k] - omega(T[i][j], rho_point[i][j])* (f_temp[j*x_size*9 + i*9 + k]
+                                                                                        - f_eq[j*x_size*9 + i*9 + k]);
+          g[j*x_size*9 + i*9+k] = g_temp[j*x_size*9 + i*9+k] - omega(T[i][j], rho_point[i][j])*(g_temp[j*x_size*9 + i*9 + k]
+                                                                                        - g_eq[j*x_size*9 + i*9 + k]);
 
         }
       }
@@ -627,7 +635,9 @@ int main(int argc, char **argv)
   }
   for (int j=1; j<y_size-1; j++)
     for (int i=1; i<x_size-1; i++)
-      fprintf(tecplot, "%d %d %f %f %f %f %f %f \n", i, j, vel[i*2+j*2*x_size],vel[i*2+j*2*x_size+1], sqrt(vel[i*2+j*2*x_size]*vel[i*2+j*2*x_size]+vel[i*2+j*2*x_size+1]*vel[i*2+j*2*x_size+1]), T[i][j], rho_point[i][j], rho_point[i][j]*T[i][j]);
+      fprintf(tecplot, "%d %d %f %f %f %f %f %f \n", i, j, vel[i*2+j*2*x_size],vel[i*2+j*2*x_size+1],
+              sqrt(vel[i*2+j*2*x_size]*vel[i*2+j*2*x_size]+vel[i*2+j*2*x_size+1]*vel[i*2+j*2*x_size+1]), T[i][j],
+              rho_point[i][j], rho_point[i][j]*T[i][j]);
   for (int j=0; j<y_size; j++)
     for (int i=0; i<x_size; i++)
       fprintf(veldat, "%d %d %f \n", i, j, vel[i*2+j*2*x_size]);
@@ -646,5 +656,5 @@ int main(int argc, char **argv)
   for (int j=0; j<y_size; j++)
     for (int i=0; i<x_size; i++)
       fprintf(Tdat, "%d %d %f \n", i, j, T[i][j]);
-    return 0;
+  return 0;
 }

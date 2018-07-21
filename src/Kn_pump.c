@@ -14,7 +14,7 @@ const double R = 8.31/0.04; //
 const double gam = 1.66;   //
 double dx = 1;
 double dt = 1;
-double Pr = 1;
+double Pr = 2./3;
 float Kn=0.5;
 // Viscosity
 //
@@ -92,7 +92,7 @@ double macro_temp(double* g_point, double rho, double * u)
   for(int k=0; k<9; ++k){
     result+= *(g_point+k);
   }
-  return result/rho/R;
+  return result/R/rho;
 }
 void macro_vel(double * u_point,double * f_point, double rho, double temperature) // speed
 {
@@ -120,9 +120,24 @@ void equalibrum(double * f_eq, double * g_eq,double * u, double rho, double T) /
     double tmp;
     float sc = scalar(e[k],temp);
     tmp = w[k] * (3 * sc / c + 4.5 * sc * sc / c / c - 1.5 * sq_module(temp) / c / c);
+
     *(f_eq+k) = w[k] * rho + rho * tmp;
-    *(g_eq+k) = R*T* *(f_eq+k);
   }
+  *(g_eq) = -2*rho*R*T*sq_module(temp)/3/c/c;
+  control_sum = -2*T*rho*sq_module(temp)/3/c/c;
+  for (int k =1; k<5; ++k){
+      float sc = scalar(e[k],temp);
+      *(g_eq+k)=T/9*rho*R * (1.5+ 1.5*sc/c/c + 4.5*sc*sc/c/c - 1.5*sq_module(temp)/c/c );
+      control_sum+= *(g_eq+k);
+  }
+  for (int k =5; k<9; ++k){
+      float sc = scalar(e[k],temp);
+      *(g_eq+k)=T/36*rho* R* (3+ 6*sc/c/c + 9*sc*sc/c/c/2 - 1.5*sq_module(temp)/c/c );
+      control_sum+=  *(g_eq+k);
+  }
+//  printf("%f %f \n", control_sum/rho/R, T);
+
+
 }
 
 int main(int argc, char **argv)
