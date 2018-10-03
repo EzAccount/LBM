@@ -28,7 +28,7 @@ double omega(double temperature, double rho)
 {
   //double nu = mu_powerlow(temperature)/dx/dx*dt; //*dx*dx/dt;
   double tau;
-  tau = sqrt(3*3.1415 / 8) /rho* Kn*(x_size-2)*pow(temperature, 0.7) + 0.5;
+  tau = sqrt(3*3.1415 / 8) /rho* Kn*(x_size-2)*pow(temperature, 0.71) + 0.5;
   return 1./tau;
 
   // Check Palabos wiki, models, boundary review.
@@ -205,12 +205,7 @@ int main(int argc, char **argv)
   double T[x_size][y_size];
   double P[x_size][y_size];
   double rho_point[x_size][y_size];
-  printf("%p\n", f_temp  + x_size*(y_size-1)*9-18+6);
-  printf("%p\n", f_temp  + x_size*(y_size-1)*9-18+8);
-  printf("%p\n", f  + x_size*(y_size-1)*9+(x_size-1)*9+6);
-  printf("%p\n", f  + x_size*(y_size-1)*9+(x_size-1)*9+8);
-
-
+  double q[x_size][y_size];
 
   int x1,x2,y1,y2;
   int h = 5;
