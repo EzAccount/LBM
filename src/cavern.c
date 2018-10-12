@@ -191,6 +191,8 @@ int main(int argc, char **argv)
   double T[x_size][y_size];
   double P[x_size][y_size];
   double rho_point[x_size][y_size];
+  double qx[x_size][y_size];
+  double qy[x_size][y_size];
   int x1,x2,y1,y2;
   int h = 5;
   x1 = x_size/5;
@@ -596,6 +598,12 @@ int main(int argc, char **argv)
         macro_vel(vel_point, f_point, rho_point[i][j], T[i][j]);
         T[i][j] = macro_temp(ftemp_point, rho_point[i][j], vel_point);
         P[i][j] = rho_point[i][j]*T[i][j];
+        qx[i][j]=0;
+        qy[i][j]=0;
+        for (int k = 0; k<9; ++k) {
+            qx[i][j] += (e[k][0] - *vel_point)*(e[k][0] - *vel_point) / 2. * *(f_point+k) * e[k][0];
+            qy[i][j] += (e[k][0] - *vel_point)*(e[k][1] - *vel_point) / 2. * *(f_point+k) * e[k][1];
+        }
       }
     }
     // if (t%50==0) {
@@ -627,7 +635,7 @@ int main(int argc, char **argv)
   }
   for (int j=1; j<y_size-1; j++)
     for (int i=1; i<x_size-1; i++)
-      fprintf(tecplot, "%d %d %f %f %f %f %f %f \n", i, j, vel[i*2+j*2*x_size],vel[i*2+j*2*x_size+1], sqrt(vel[i*2+j*2*x_size]*vel[i*2+j*2*x_size]+vel[i*2+j*2*x_size+1]*vel[i*2+j*2*x_size+1]), T[i][j], rho_point[i][j], rho_point[i][j]*T[i][j]);
+      fprintf(tecplot, "%d %d %f %f %f %f %f %f %f %f\n", i, j, vel[i*2+j*2*x_size],vel[i*2+j*2*x_size+1], sqrt(vel[i*2+j*2*x_size]*vel[i*2+j*2*x_size]+vel[i*2+j*2*x_size+1]*vel[i*2+j*2*x_size+1]), T[i][j], rho_point[i][j], rho_point[i][j]*T[i][j], qx[i][j], qy[i][j]);
   for (int j=0; j<y_size; j++)
     for (int i=0; i<x_size; i++)
       fprintf(veldat, "%d %d %f \n", i, j, vel[i*2+j*2*x_size]);
@@ -646,5 +654,5 @@ int main(int argc, char **argv)
   for (int j=0; j<y_size; j++)
     for (int i=0; i<x_size; i++)
       fprintf(Tdat, "%d %d %f \n", i, j, T[i][j]);
-    return 0;
+  return 0;
 }
