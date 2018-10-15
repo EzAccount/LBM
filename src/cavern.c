@@ -620,8 +620,8 @@ int main(int argc, char **argv)
                 qx[i][j]=0;
                 qy[i][j]=0;
                 for (int k = 0; k<9; ++k) {
-                    qx[i][j] += (e[k][0] - *vel_point)*(e[k][0] - *vel_point) / 2. * *(f_point+k) * e[k][0];
-                    qy[i][j] += (e[k][0] - *vel_point)*(e[k][1] - *vel_point) / 2. * *(f_point+k) * e[k][1];
+                    qx[i][j] += (1 - omega(T[i][j], rho_point[i][j])/2) * *(g_point+k) * e[k][0];
+                    qy[i][j] += (1 - omega(T[i][j], rho_point[i][j])/2) * *(g_point+k) * e[k][1];
                 }
             }
         }
@@ -650,6 +650,12 @@ int main(int argc, char **argv)
             macro_vel(vel_point, f_point, rho_point[i][j], T[i][j]);
             T[i][j] =  macro_temp(g_point, rho_point[i][j], vel_point);
             P[i][j] = rho_point[i][j]*T[i][j];
+            qx[i][j]=0;
+            qy[i][j]=0;
+            for (int k = 0; k<9; ++k) {
+                qx[i][j] += (1 - omega(T[i][j], rho_point[i][j])/2) * *(g_point+k) * e[k][0];
+                qy[i][j] += (1 - omega(T[i][j], rho_point[i][j])/2) * *(g_point+k) * e[k][1];
+            }
         }
     }
     for (int j=1; j<y_size-1; j++)
