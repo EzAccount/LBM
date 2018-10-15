@@ -7,8 +7,8 @@
 //
 // speed of sound, assuming dx/dt=1;
 double e[9][2];            // basic
-const int x_size = 92;     // points among x
-const int y_size = 52;     // points among y
+const int x_size = 52;     // points among x
+const int y_size = 12;     // points among y
 int h = 3;
 const double R = 8.31/0.04; //
 const double gam = 1.66;   //
@@ -1045,10 +1045,6 @@ int main(int argc, char **argv)
         {
           f[j*x_size*9 + i*9+k] = f_temp[j*x_size*9 + i*9+k] - omega(T[i][j], rho_point[i][j])*(f_temp[j*x_size*9 + i*9 + k] - f_eq[j*x_size*9 + i*9 + k]);
           g[j*x_size*9 + i*9+k] = g_temp[j*x_size*9 + i*9+k] - omega_g(T[i][j], rho_point[i][j])*(g_temp[j*x_size*9 + i*9 + k] - g_eq[j*x_size*9 + i*9 + k]);
-          printf("%d %d %d %p ",i, j,k, (g+j*x_size*9 + i*9+k));
-          printf("%f ",  f[j*x_size*9 + i*9+k]);
-          printf("%f\n",  g[j*x_size*9 + i*9+k]);
-          if (fabs(g[j*x_size*9 + i*9+k])>1) printf("HUI\n\n");
         }
 
       }
@@ -1173,5 +1169,5 @@ int main(int argc, char **argv)
   for (int j=1; j<y_size-1; j++)
     for (int i=1; i<x_size-1; i++)
       fprintf(debug, "%d %d %f \n", i, j, f_eq[9*x_size*j + i*9 +6]);
-    return 0;
+  return 0;
 }
