@@ -124,17 +124,20 @@ void equalibrum(double * f_eq, double * g_eq,double * u, double rho, double T) /
 
     *(f_eq+k) = w[k] * rho + rho * tmp;
   }
-  *(g_eq) = -2*rho*T*sq_module(temp)/3/c/c;
-  control_sum = -2*T*rho*sq_module(temp)/3/c/c;
-  for (int k =1; k<5; ++k){
+  *(g_eq) = - 2./3*rho*R*T * sq_module(temp) /c;
+  for (int k=1; k<5; ++k)
+  {
       float sc = scalar(e[k],temp);
-      *(g_eq+k)=T/9*rho * (1.5+ 1.5*sc/c + 4.5*sc*sc/c/c - 1.5*sq_module(temp)/c );
-      control_sum+= *(g_eq+k);
+      double tmp;
+      tmp = 3./2 + 3./2*sc/c + 9./2 * sc*sc/c/c - 1.5 * sq_module(temp)/c/c;
+      *(g_eq+k) = rho * R * T * tmp / 9;
   }
-  for (int k =5; k<9; ++k){
+    for (int k=5; k<9; ++k)
+  {
       float sc = scalar(e[k],temp);
-      *(g_eq+k)=T/36*rho*  (3+ 6*sc/c + 9*sc*sc/c/c/2 - 1.5*sq_module(temp)/c );
-      control_sum+=  *(g_eq+k);
+      double tmp;
+      tmp = 3. + 6*sc/c + 9./2 * sc*sc/c/c - 1.5 * sq_module(temp)/c/c;
+      *(g_eq+k) = rho * R * T * tmp / 36;
   }
 //  printf("%f %f \n", control_sum/rho/R, T);
 
