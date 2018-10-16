@@ -7,9 +7,9 @@
 //
 // speed of sound, assuming dx/dt=1;
 double e[9][2];            // basic
-const int x_size = 52;     // points among x
-const int y_size = 12;     // points among y
-int h = 3;
+const int x_size = 202;     // points among x
+const int y_size = 52;     // points among y
+int h = 7;
 const double R = 8.31/0.04; //
 const double gam = 1.66;   //
 double dx = 1;
@@ -32,7 +32,7 @@ double mu_other(double temperature){
 double omega(double temperature, double rho)
 {
   double tau;
-  tau = sqrt(3*3.1415 / 8) / rho * Kn * h * pow(temperature, 0.2) + 0.5;
+  tau = sqrt(3*3.1415 / 8) / rho * Kn * h * pow(temperature, 0.21) + 0.5;
   return 1./tau;
 }
 double omega_g(double temperature, double rho)
@@ -93,7 +93,7 @@ double macro_temp(double* g_point, double rho, double * u)
   for(int k=0; k<9; ++k){
     result+= *(g_point+k);
   }
-  return result/rho;
+  return result/rho/R;
 }
 void macro_vel(double * u_point,double * f_point, double rho, double temperature) // speed
 {
@@ -154,19 +154,19 @@ int main(int argc, char **argv)
   e[1][0] = 1.;
   e[1][1] = 0.;
   e[2][0] = 0.;
-  e[2][1] = -1.;
+  e[2][1] = 1.;
   e[3][0] = -1.;
   e[3][1] = 0.;
   e[4][0] = 0.;
-  e[4][1] = 1.;
+  e[4][1] = -1.;
   e[5][0] = 1.;
-  e[5][1] = -1.;
+  e[5][1] = 1.;
   e[6][0] = -1.;
-  e[6][1] = -1.;
+  e[6][1] = 1.;
   e[7][0] = -1.;
-  e[7][1] = 1.;
+  e[7][1] = -1.;
   e[8][0] = 1.;
-  e[8][1] = 1.;
+  e[8][1] = -1.;
   //
   //  General constants
   //
@@ -213,6 +213,8 @@ int main(int argc, char **argv)
   double T[x_size][y_size];
   double P[x_size][y_size];
   double rho_point[x_size][y_size];
+  double qx[x_size][y_size];
+  double qy[x_size][y_size];
   int x1,x2,y1,y2;
 
   x1 = x_size/3;
@@ -235,6 +237,16 @@ int main(int argc, char **argv)
     g[i] = 0;
     g_eq[i] = 0;
     g_temp[i] = 0;
+  }
+  for (int i = 0; i < x_size*y_size*2; ++i){
+      vel[i] = 0;
+  }
+  for (int i = 0; i < x_size; ++i){
+      for(int j=0; j<x_size; ++j){
+          P[i][j] = 0;
+          rho_point[i][j] = 0;
+          T[i][j] = 0;
+      }
   }
 
   for (int i = 0; i < y_size; ++i){
@@ -383,49 +395,49 @@ int main(int argc, char **argv)
         ftemp_point = f_temp + 9*j*x_size + 9*i;
         f_point = f + 9*j*x_size + 9*i;
         *(ftemp_point) = *(f_point);
-        *(ftemp_point - 9 * (x_size + 1) + 6) = *(f_point+6);
         *(ftemp_point + 9 + 1) = *(f_point+1);
-        *(ftemp_point - 9 * x_size+2) = *(f_point+2);
+        *(ftemp_point + 9 * x_size+2) = *(f_point+2);
         *(ftemp_point - 9 + 3) = *(f_point+3);
-        *(ftemp_point + 9 * x_size + 4) = *(f_point+4);
-        *(ftemp_point - 9 * (x_size - 1) + 5) = *(f_point+5);
-        *(ftemp_point + 9 * (x_size - 1) + 7) = *(f_point+7);
-        *(ftemp_point + 9 * (x_size + 1) + 8) = *(f_point+8);
+        *(ftemp_point - 9 * x_size + 4) = *(f_point+4);
+        *(ftemp_point + 9 * (x_size + 1) + 5) = *(f_point+5);
+        *(ftemp_point + 9 * (x_size - 1) + 6) = *(f_point+6);
+        *(ftemp_point - 9 * (x_size + 1) + 7) = *(f_point+7);
+        *(ftemp_point - 9 * (x_size - 1) + 8) = *(f_point+8);
         gtemp_point = g_temp + 9*j*x_size + 9*i;
         g_point = g + 9*j*x_size + 9*i;
         *(gtemp_point) = *(g_point);
         *(gtemp_point + 9 + 1) = *(g_point+1);
-        *(gtemp_point - 9 * x_size+2) = *(g_point+2);
+        *(gtemp_point + 9 * x_size+2) = *(g_point+2);
         *(gtemp_point - 9 + 3) = *(g_point+3);
-        *(gtemp_point + 9 * x_size + 4) = *(g_point+4);
-        *(gtemp_point - 9 * (x_size - 1) + 5) = *(g_point+5);
-        *(gtemp_point - 9 * (x_size + 1) + 6) = *(g_point+6);
-        *(gtemp_point + 9 * (x_size - 1) + 7) = *(g_point+7);
-        *(gtemp_point + 9 * (x_size + 1) + 8) = *(g_point+8);
+        *(gtemp_point - 9 * x_size + 4) = *(g_point+4);
+        *(gtemp_point + 9 * (x_size + 1) + 5) = *(g_point+5);
+        *(gtemp_point + 9 * (x_size - 1) + 6) = *(g_point+6);
+        *(gtemp_point - 9 * (x_size + 1) + 7) = *(g_point+7);
+        *(gtemp_point - 9 * (x_size - 1) + 8) = *(g_point+8);
       }
       for (int i = x2 + 1; i < x_size-1; ++i){
         ftemp_point = f_temp + 9*j*x_size + 9*i;
         f_point = f + 9*j*x_size + 9*i;
         *(ftemp_point) = *(f_point);
         *(ftemp_point + 9 + 1) = *(f_point+1);
-        *(ftemp_point - 9 * x_size+2) = *(f_point+2);
+        *(ftemp_point + 9 * x_size+2) = *(f_point+2);
         *(ftemp_point - 9 + 3) = *(f_point+3);
-        *(ftemp_point + 9 * x_size + 4) = *(f_point+4);
-        *(ftemp_point - 9 * (x_size - 1) + 5) = *(f_point+5);
-        *(ftemp_point - 9 * (x_size + 1) + 6) = *(f_point+6);
-        *(ftemp_point + 9 * (x_size - 1) + 7) = *(f_point+7);
-        *(ftemp_point + 9 * (x_size + 1) + 8) = *(f_point+8);
+        *(ftemp_point - 9 * x_size + 4) = *(f_point+4);
+        *(ftemp_point + 9 * (x_size + 1) + 5) = *(f_point+5);
+        *(ftemp_point + 9 * (x_size - 1) + 6) = *(f_point+6);
+        *(ftemp_point - 9 * (x_size + 1) + 7) = *(f_point+7);
+        *(ftemp_point - 9 * (x_size - 1) + 8) = *(f_point+8);
         gtemp_point = g_temp + 9*j*x_size + 9*i;
         g_point = g + 9*j*x_size + 9*i;
         *(gtemp_point) = *(g_point);
         *(gtemp_point + 9 + 1) = *(g_point+1);
-        *(gtemp_point - 9 * x_size+2) = *(g_point+2);
+        *(gtemp_point + 9 * x_size+2) = *(g_point+2);
         *(gtemp_point - 9 + 3) = *(g_point+3);
-        *(gtemp_point + 9 * x_size + 4) = *(g_point+4);
-        *(gtemp_point - 9 * (x_size - 1) + 5) = *(g_point+5);
-        *(gtemp_point - 9 * (x_size + 1) + 6) = *(g_point+6);
-        *(gtemp_point + 9 * (x_size - 1) + 7) = *(g_point+7);
-        *(gtemp_point + 9 * (x_size + 1) + 8) = *(g_point+8);
+        *(gtemp_point - 9 * x_size + 4) = *(g_point+4);
+        *(gtemp_point + 9 * (x_size + 1) + 5) = *(g_point+5);
+        *(gtemp_point + 9 * (x_size - 1) + 6) = *(g_point+6);
+        *(gtemp_point - 9 * (x_size + 1) + 7) = *(g_point+7);
+        *(gtemp_point - 9 * (x_size - 1) + 8) = *(g_point+8);
       }
     }
 
@@ -435,243 +447,244 @@ int main(int argc, char **argv)
         f_point = f + 9*i*x_size + 9*j;
         *(ftemp_point) = *(f_point);
         *(ftemp_point + 9 + 1) = *(f_point+1);
-        *(ftemp_point - 9 * x_size+2) = *(f_point+2);
+        *(ftemp_point + 9 * x_size+2) = *(f_point+2);
         *(ftemp_point - 9 + 3) = *(f_point+3);
-        *(ftemp_point + 9 * x_size + 4) = *(f_point+4);
-        *(ftemp_point - 9 * (x_size - 1) + 5) = *(f_point+5);
-        *(ftemp_point - 9 * (x_size + 1) + 6) = *(f_point+6);
-        *(ftemp_point + 9 * (x_size - 1) + 7) = *(f_point+7);
-        *(ftemp_point + 9 * (x_size + 1) + 8) = *(f_point+8);
+        *(ftemp_point - 9 * x_size + 4) = *(f_point+4);
+        *(ftemp_point + 9 * (x_size + 1) + 5) = *(f_point+5);
+        *(ftemp_point + 9 * (x_size - 1) + 6) = *(f_point+6);
+        *(ftemp_point - 9 * (x_size + 1) + 7) = *(f_point+7);
+        *(ftemp_point - 9 * (x_size - 1) + 8) = *(f_point+8);
         gtemp_point = g_temp + 9*i*x_size + 9*j;
         g_point = g +  9*i*x_size + 9*j;
         *(gtemp_point) = *(g_point);
         *(gtemp_point + 9 + 1) = *(g_point+1);
-        *(gtemp_point - 9 * x_size+2) = *(g_point+2);
+        *(gtemp_point + 9 * x_size+2) = *(g_point+2);
         *(gtemp_point - 9 + 3) = *(g_point+3);
-        *(gtemp_point + 9 * x_size + 4) = *(g_point+4);
-        *(gtemp_point - 9 * (x_size - 1) + 5) = *(g_point+5);
-        *(gtemp_point - 9 * (x_size + 1) + 6) = *(g_point+6);
-        *(gtemp_point + 9 * (x_size - 1) + 7) = *(g_point+7);
-        *(gtemp_point + 9 * (x_size + 1) + 8) = *(g_point+8);
+        *(gtemp_point - 9 * x_size + 4) = *(g_point+4);
+        *(gtemp_point + 9 * (x_size + 1) + 5) = *(g_point+5);
+        *(gtemp_point + 9 * (x_size - 1) + 6) = *(g_point+6);
+        *(gtemp_point - 9 * (x_size + 1) + 7) = *(g_point+7);
+        *(gtemp_point - 9 * (x_size - 1) + 8) = *(g_point+8);
       }
     }
 
     //
-    // top boundaries
+    // bot boundaries
     //
     for (int i=1; i<x1; ++i){
       ftemp_point = f_temp + i*9;
       f_point = f + i*9;
       vel_point = vel + i * 2;
       // transfer
-      *(ftemp_point + 9 * x_size + 4) = *(f_point+4);
-      *(ftemp_point + 9 * (x_size - 1) + 7) = *(f_point+7);
-      *(ftemp_point + 9 * (x_size + 1) + 8) = *(f_point+8);
+      *(ftemp_point + 9 * x_size + 2) = *(f_point+4);
+      *(ftemp_point + 9 * (x_size - 1) + 6) = *(f_point+6);
+      *(ftemp_point + 9 * (x_size + 1) + 5) = *(f_point+5);
       gtemp_point = g_temp + i*9;
       g_point = g + i*9;
       vel_point = vel + i * 2;
       // transfer
-      *(gtemp_point + 9 * x_size + 4) =*(g_point+4);
-      *(gtemp_point + 9 * (x_size - 1) + 7) =*(g_point+7);
-      *(gtemp_point + 9 * (x_size + 1) + 8) =*(g_point+8);
+      *(gtemp_point + 9 * x_size + 2) =*(g_point+2);
+      *(gtemp_point + 9 * (x_size - 1) + 6) =*(g_point+6);
+      *(gtemp_point + 9 * (x_size + 1) + 5) =*(g_point+5);
     }
     for (int i=x1+1; i<x2; ++i){
       ftemp_point = f_temp + i*9 + 9*x_size*y1;
       f_point = f + i*9 + 9*x_size*y1;
       vel_point = vel + i * 2 + 2*x_size*y1;
       // transfer
-      *(ftemp_point + 9 * x_size + 4) = *(f_point+4);
-      *(ftemp_point + 9 * (x_size - 1) + 7) = *(f_point+7);
-      *(ftemp_point + 9 * (x_size + 1) + 8) = *(f_point+8);
+      *(ftemp_point + 9 * x_size + 2) = *(f_point+4);
+      *(ftemp_point + 9 * (x_size - 1) + 6) = *(f_point+6);
+      *(ftemp_point + 9 * (x_size + 1) + 5) = *(f_point+5);
+
       gtemp_point = g_temp + i*9 + 9*x_size*y1;
       g_point = g + i*9 + 9*x_size*y1;
       vel_point = vel + i * 2 + 2*x_size*y1;
       // transfer
-      *(gtemp_point + 9 * x_size + 4) =*(g_point+4);
-      *(gtemp_point + 9 * (x_size - 1) + 7) = *(g_point+7);
-      *(gtemp_point + 9 * (x_size + 1) + 8) = *(g_point+8);
+      *(gtemp_point + 9 * x_size + 2) =*(g_point+2);
+      *(gtemp_point + 9 * (x_size - 1) + 6) =*(g_point+6);
+      *(gtemp_point + 9 * (x_size + 1) + 5) =*(g_point+5);
     }
     for (int i=x2+1; i<x_size-1; ++i){
       ftemp_point = f_temp + i*9;
       f_point = f + i*9;
       vel_point = vel + i * 2;
       // transfer
-      *(ftemp_point + 9 * x_size + 4) = *(f_point+4);
-      *(ftemp_point + 9 * (x_size - 1) + 7) = *(f_point+7);
-      *(ftemp_point + 9 * (x_size + 1) + 8) = *(f_point+8);
+      *(ftemp_point + 9 * x_size + 2) = *(f_point+2);
+      *(ftemp_point + 9 * (x_size - 1) + 6) = *(f_point+6);
+      *(ftemp_point + 9 * (x_size + 1) + 5) = *(f_point+5);
       gtemp_point = g_temp + i*9;
       g_point = g + i*9;
       vel_point = vel + i * 2;
       // transfer
-      *(gtemp_point + 9 * x_size + 4) =*(g_point+4);
-      *(gtemp_point + 9 * (x_size - 1) + 7) =*(g_point+7);
-      *(gtemp_point + 9 * (x_size + 1) + 8) =*(g_point+8);
+      *(gtemp_point + 9 * x_size + 2) =*(g_point+2);
+      *(gtemp_point + 9 * (x_size - 1) + 6) =*(g_point+6);
+      *(gtemp_point + 9 * (x_size + 1) + 5) =*(g_point+5);
     }
 
     // Corners:
-    // left-top:
+    // left-bot:
     ftemp_point = f_temp;
     f_point = f;
-    *(ftemp_point + 9 * (x_size + 1) + 8) = *(f_point+8);
+    *(ftemp_point + 9 * (x_size + 1) + 5) = *(f_point+5);
     gtemp_point = g_temp;
     g_point = g;
-    *(gtemp_point + 9 * (x_size + 1) + 8) = *(g_point+8);
+    *(gtemp_point + 9 * (x_size + 1) + 5) = *(g_point+5);
 
-    // top x1:
+    // bot x1:
     ftemp_point = f_temp + x1*9;
     f_point = f + x1*9;
-    *(ftemp_point + 9 * (x_size - 1) + 7) = *(f_point+7);
+    *(ftemp_point + 9 * (x_size - 1) + 6) = *(f_point+6);
     gtemp_point = g_temp + x1*9;
     g_point = g + x1*9;
-    *(gtemp_point + 9 * (x_size - 1) + 7) =  *(g_point+7);
+    *(gtemp_point + 9 * (x_size - 1) + 6) =  *(g_point+6);
 
-    // top x2:
+    // bot x2:
     ftemp_point = f_temp + x2*9;
     f_point = f + x2*9;
-    *(ftemp_point + 9 * (x_size + 1) + 8) = *(f_point+8);
+    *(ftemp_point + 9 * (x_size + 1) + 5) = *(f_point+5);
     gtemp_point = g_temp + x2*9;
     g_point = g + x2*9;
-    *(gtemp_point + 9 * (x_size + 1) + 8) = *(g_point+8);
+    *(gtemp_point + 9 * (x_size + 1) + 5) = *(g_point+5);
 
-    // right-top
+    // right-bot
     ftemp_point = f_temp + x_size*9 - 9;
     f_point = f + x_size*9 - 9;
-    *(ftemp_point + 9 * (x_size - 1) + 7) = *(f_point+7);
+    *(ftemp_point + 9 * (x_size - 1) + 6) = *(f_point+6);
     gtemp_point = g_temp + x_size*9 - 9;
     g_point = g + x_size*9 - 9;
-    *(gtemp_point + 9 * (x_size - 1) + 7) =*(g_point+7);
+    *(gtemp_point + 9 * (x_size - 1) + 6) =*(g_point+6);
 
-    // bottom
+    // top
     for (int i=1; i<x1; ++i){
       ftemp_point = f_temp  +(y_size-1)*x_size*9+ i*9;
       f_point = f +(y_size-1)*x_size*9+ i*9;
       // transfer
-      *(ftemp_point - 9 * x_size + 2) = *(f_point+2);
-      *(ftemp_point - 9 * (x_size - 1) + 5) = *(f_point+5);
-      *(ftemp_point - 9 * (x_size + 1) + 6) = *(f_point+6);
+      *(ftemp_point - 9 * x_size + 4) = *(f_point+4);
+      *(ftemp_point - 9 * (x_size - 1) + 8) = *(f_point+8);
+      *(ftemp_point - 9 * (x_size + 1) + 7) = *(f_point+7);
       gtemp_point = g_temp  +(y_size-1)*x_size*9+ i*9;
-      *(gtemp_point - 9 * x_size + 2) =*(g_point+2);
-      *(gtemp_point - 9 * (x_size - 1) + 5) =*(g_point+5);
-      *(gtemp_point - 9 * (x_size + 1) + 6) =*(g_point+6);
+      *(gtemp_point - 9 * x_size + 4) =*(g_point+4);
+      *(gtemp_point - 9 * (x_size - 1) + 8) =*(g_point+8);
+      *(gtemp_point - 9 * (x_size + 1) + 7) =*(g_point+7);
     }
     for (int i=x1+1; i<x2; ++i){
       ftemp_point = f_temp  + y2*x_size*9+ i*9;
       f_point = f +y2*x_size*9+ i*9;
       // transfer
-      *(ftemp_point - 9 * x_size + 2) = *(f_point+2);
-      *(ftemp_point - 9 * (x_size - 1) + 5) = *(f_point+5);
-      *(ftemp_point - 9 * (x_size + 1) + 6) = *(f_point+6);
+      *(ftemp_point - 9 * x_size + 4) = *(f_point+4);
+      *(ftemp_point - 9 * (x_size - 1) + 8) = *(f_point+8);
+      *(ftemp_point - 9 * (x_size + 1) + 7) = *(f_point+7);
       gtemp_point = g_temp  + y2*x_size*9+ i*9;
       g_point = g +y2*x_size*9+ i*9;
       // transfer
-      *(gtemp_point - 9 * x_size + 2) =*(g_point+2);
-    *(gtemp_point - 9 * (x_size - 1) + 5) =*(g_point+5);
-      *(gtemp_point - 9 * (x_size + 1) + 6) =*(g_point+6);
+      *(gtemp_point - 9 * x_size + 4) =*(g_point+4);
+    *(gtemp_point - 9 * (x_size - 1) + 8) =*(g_point+8);
+      *(gtemp_point - 9 * (x_size + 1) +7) =*(g_point+7);
     }
     for (int i=x2+1; i<x_size-1; ++i){
       ftemp_point = f_temp + i*9 + (y_size-1)*(x_size)*9;
       f_point = f + i*9 + (y_size-1)*(x_size)*9;
-      *(ftemp_point - 9 * x_size + 2) = *(f_point+2);
-      *(ftemp_point - 9 * (x_size - 1) + 5) = *(f_point+5);
-      *(ftemp_point - 9 * (x_size + 1) + 6) = *(f_point+6);
+      *(ftemp_point - 9 * x_size + 4) = *(f_point+4);
+      *(ftemp_point - 9 * (x_size - 1) + 8) = *(f_point+8);
+      *(ftemp_point - 9 * (x_size + 1) + 7) = *(f_point+7);
       gtemp_point = g_temp + i*9 + (y_size-1)*(x_size)*9;
       g_point = g + i*9 + (y_size-1)*(x_size)*9;
-      *(gtemp_point - 9 * x_size + 2) =*(g_point+2);
-      *(gtemp_point - 9 * (x_size - 1) + 5) =*(g_point+5);
-      *(gtemp_point - 9 * (x_size + 1) + 6) =*(g_point+6);
+      *(gtemp_point - 9 * x_size + 4) =*(g_point+4);
+      *(gtemp_point - 9 * (x_size - 1) + 8) =*(g_point+8);
+      *(gtemp_point - 9 * (x_size + 1) + 7) =*(g_point+7);
     }
 
     //Corners:
-    //left-bot:
+    //left-top:
     ftemp_point = f_temp + (y_size-1)*x_size*9;
     f_point = f + (y_size-1)*x_size*9;
-    *(ftemp_point - 9 * (x_size - 1) + 5) = *(f_point+5);
+    *(ftemp_point - 9 * (x_size - 1) + 8) = *(f_point+8);
     gtemp_point = g_temp + (y_size-1)*x_size*9;
     g_point = g + (y_size-1)*x_size*9;
     *(gtemp_point - 9 * (x_size - 1) + 5) = *(g_point+5);
-    //right-bot:
+    //right-top:
     ftemp_point = f_temp + (y_size-1)*x_size*9 + x_size*9 - 9;
     f_point = f + (y_size-1)*x_size*9 + x_size*9 - 9;
-    *(ftemp_point - 9 * (x_size + 1) + 6) = *(f_point+6);
+    *(ftemp_point - 9 * (x_size + 1) + 7) = *(f_point+7);
     gtemp_point = g_temp + (y_size-1)*x_size*9 + x_size*9 - 9;
     g_point = g + (y_size-1)*x_size*9 + x_size*9 - 9;
-    *(gtemp_point - 9 * (x_size + 1) + 6) =*(g_point+6);
-    // x2 - bot
+    *(gtemp_point - 9 * (x_size + 1) + 7) =*(g_point+7);
+    // x2 - top
     ftemp_point = f_temp + (y_size-1)*x_size*9 + 9*x2;
     f_point = f + (y_size-1)*x_size*9 + 9*x2;
-    *(ftemp_point - 9 * (x_size - 1) + 5) = *(f_point+5);
+    *(ftemp_point - 9 * (x_size - 1) + 8) = *(f_point+8);
     gtemp_point = g_temp + (y_size-1)*x_size*9 + 9*x2;
     g_point = g + (y_size-1)*x_size*9 + 9*x2;
-    *(gtemp_point - 9 * (x_size - 1) + 5) =*(g_point+5);
-    // x1 - bot
+    *(gtemp_point - 9 * (x_size - 1) + 8) =*(g_point+8);
+    // x1 - top
     ftemp_point = f_temp + (y_size-1)*x_size*9 + 9*x1;
     f_point = f + (y_size-1)*x_size*9 + 9*x1;
-    *(ftemp_point - 9 * (x_size + 1) + 6) = *(f_point+6);
+    *(ftemp_point - 9 * (x_size + 1) + 7) = *(f_point+7);
     gtemp_point = g_temp + (y_size-1)*x_size*9 + 9*x1;
     g_point = g + (y_size-1)*x_size*9 + 9*x1;
-    *(gtemp_point - 9 * (x_size + 1) + 6) =*(g_point+6);
+    *(gtemp_point - 9 * (x_size + 1) + 7) =*(g_point+7);
 
     // inside coreners:
     f_point = f + y1*x_size*9 + x1*9;
     ftemp_point = f_temp + y1*x_size*9 + x1*9;
     *(ftemp_point - 9 + 3) = *(f_point+3);
-    *(ftemp_point + 9 * x_size + 4) = *(f_point+4);
-    *(ftemp_point - 9 * (x_size + 1) + 6) = *(f_point+6);
-    *(ftemp_point + 9 * (x_size - 1) + 7) = *(f_point+7);
-    *(ftemp_point + 9 * (x_size + 1) + 8) = *(f_point+8);
+    *(ftemp_point + 9 * x_size + 2) = *(f_point+2);
+    *(ftemp_point + 9 * (x_size - 1) + 6) = *(f_point+6);
+    *(ftemp_point - 9 * (x_size + 1) + 7) = *(f_point+7);
+    *(ftemp_point + 9 * (x_size + 1) + 5) = *(f_point+5);
     g_point = g + y1*x_size*9 + x1*9;
     gtemp_point = g_temp + y1*x_size*9 + x1*9;
     *(gtemp_point - 9 + 3) =*(g_point+3);
-    *(gtemp_point + 9 * x_size + 4) =*(g_point+4);
-    *(gtemp_point - 9 * (x_size + 1) + 6) =*(g_point+6);
-    *(gtemp_point + 9 * (x_size - 1) + 7) =*(g_point+7);
-    *(gtemp_point + 9 * (x_size + 1) + 8) =*(g_point+8);
+    *(gtemp_point + 9 * x_size + 2) =*(g_point+2);
+    *(gtemp_point + 9 * (x_size - 1) + 6) =*(g_point+6);
+    *(gtemp_point - 9 * (x_size + 1) + 7) =*(g_point+7);
+    *(gtemp_point + 9 * (x_size + 1) + 5) =*(g_point+5);
 
     f_point = f + y2*x_size*9 + x1*9;
     ftemp_point = f_temp + y2*x_size*9 + x1*9;
-    *(ftemp_point - 9 * x_size+2) = *(f_point+2);
+    *(ftemp_point - 9 * x_size+4) = *(f_point+4);
     *(ftemp_point - 9 + 3) = *(f_point+3);
-    *(ftemp_point - 9 * (x_size - 1) + 5) = *(f_point+5);
-    *(ftemp_point - 9 * (x_size + 1) + 6) = *(f_point+6);
-    *(ftemp_point + 9 * (x_size - 1) + 7) = *(f_point+7);
+    *(ftemp_point - 9 * (x_size - 1) + 8) = *(f_point+8);
+    *(ftemp_point - 9 * (x_size + 1) + 7) = *(f_point+7);
+    *(ftemp_point + 9 * (x_size - 1) + 6) = *(f_point+6);
     g_point = g + y2*x_size*9 + x1*9;
     gtemp_point = g_temp + y2*x_size*9 + x1*9;
-    *(gtemp_point - 9 * x_size+2) =*(g_point+2);
+    *(gtemp_point - 9 * x_size+4) =*(g_point+4);
     *(gtemp_point - 9 + 3) =*(g_point+3);
-    *(gtemp_point - 9 * (x_size - 1) + 5) =*(g_point+5);
-    *(gtemp_point - 9 * (x_size + 1) + 6) =*(g_point+6);
-    *(gtemp_point + 9 * (x_size - 1) + 7) =*(g_point+7);
+    *(gtemp_point - 9 * (x_size - 1) + 8) =*(g_point+8);
+    *(gtemp_point - 9 * (x_size + 1) + 7) =*(g_point+7);
+    *(gtemp_point + 9 * (x_size - 1) + 6) =*(g_point+6);
 
     f_point = f + y1*x_size*9 + x2*9;
     ftemp_point = f_temp + y1*x_size*9 + x2*9;
 
     *(ftemp_point + 9 + 1) = *(f_point+1);
-    *(ftemp_point + 9 * x_size + 4) = *(f_point+4);
-    *(ftemp_point - 9 * (x_size - 1) + 5) = *(f_point+5);
-    *(ftemp_point + 9 * (x_size - 1) + 7) = *(f_point+7);
-    *(ftemp_point + 9 * (x_size + 1) + 8) = *(f_point+8);
+    *(ftemp_point + 9 * x_size + 2) = *(f_point+2);
+    *(ftemp_point - 9 * (x_size - 1) + 8) = *(f_point+8);
+    *(ftemp_point + 9 * (x_size - 1) + 6) = *(f_point+6);
+    *(ftemp_point + 9 * (x_size + 1) + 5) = *(f_point+5);
     ftemp_point = g_temp + y1*x_size*9 + x2*9;
     *(ftemp_point + 9 + 1) = *(g_point+1);
-    *(ftemp_point + 9 * x_size + 4) =*(g_point+4);
-    *(ftemp_point - 9 * (x_size - 1) + 5) =*(g_point+5);
-    *(ftemp_point + 9 * (x_size - 1) + 7) =*(g_point+7);
-    *(ftemp_point + 9 * (x_size + 1) + 8) =*(g_point+8);
+    *(ftemp_point + 9 * x_size +2) =*(g_point+2);
+    *(ftemp_point - 9 * (x_size - 1) + 8) =*(g_point+8);
+    *(ftemp_point + 9 * (x_size - 1) + 6) =*(g_point+6);
+    *(ftemp_point + 9 * (x_size + 1) + 5) =*(g_point+5);
 
     f_point = f + y2*x_size*9 + x2*9;
     ftemp_point = f_temp + y2*x_size*9 + x2*9;
     *(ftemp_point) = *(f_point);
     *(ftemp_point + 9 + 1) = *(f_point+1);
-    *(ftemp_point - 9 * x_size+2) = *(f_point+2);
-    *(ftemp_point - 9 * (x_size - 1) + 5) = *(f_point+5);
-    *(ftemp_point - 9 * (x_size + 1) + 6) = *(f_point+6);
-    *(ftemp_point + 9 * (x_size + 1) + 8) = *(f_point+8);
+    *(ftemp_point - 9 * x_size+4) = *(f_point+4);
+    *(ftemp_point - 9 * (x_size - 1) + 8) = *(f_point+8);
+    *(ftemp_point - 9 * (x_size + 1) + 7) = *(f_point+7);
+    *(ftemp_point + 9 * (x_size + 1) + 5) = *(f_point+5);
     ftemp_point = g_temp + y2*x_size*9 + x2*9;
     *(ftemp_point) = *(g_point);
     *(ftemp_point + 9 + 1) =*(g_point+1);
-    *(ftemp_point - 9 * x_size+2) =*(g_point+2);
-    *(ftemp_point - 9 * (x_size - 1) + 5) =*(g_point+5);
-    *(ftemp_point - 9 * (x_size + 1) + 6) =*(g_point+6);
-    *(ftemp_point + 9 * (x_size + 1) + 8) =*(g_point+8);
+    *(ftemp_point - 9 * x_size+4) =*(g_point+4);
+    *(ftemp_point - 9 * (x_size - 1) + 8) =*(g_point+8);
+    *(ftemp_point - 9 * (x_size + 1) + 7) =*(g_point+7);
+    *(ftemp_point + 9 * (x_size + 1) + 5) =*(g_point+5);
 
     //
     // left and right
@@ -680,22 +693,22 @@ int main(int argc, char **argv)
       ftemp_point = f_temp + j*x_size*9;
       f_point = f + j*x_size*9;
       *(ftemp_point + 9 + 1) = *(f_point + 1);
-      *(ftemp_point - 9 * (x_size - 1) + 5) = *(f_point+5);
-      *(ftemp_point + 9 * (x_size + 1) + 8) = *(f_point+8);
+      *(ftemp_point - 9 * (x_size - 1) + 8) = *(f_point+8);
+      *(ftemp_point + 9 * (x_size + 1) + 5) = *(f_point+5);
       ftemp_point = g_temp + j*x_size*9;
       *(ftemp_point + 9 + 1) =*(g_point + 1);
-      *(ftemp_point - 9 * (x_size - 1) + 5) =*(g_point+5);
-      *(ftemp_point + 9 * (x_size + 1) + 8) =*(g_point+8);
+      *(ftemp_point - 9 * (x_size - 1) + 8) =*(g_point+8);
+      *(ftemp_point + 9 * (x_size + 1) + 5) =*(g_point+5);
       //
       ftemp_point = f_temp + j*x_size*9+ 9*(x_size-1);
       f_point = f + j*x_size*9+ 9*(x_size-1);
       *(ftemp_point - 9 + 3) = *(f_point+3);
-      *(ftemp_point - 9 * (x_size + 1) + 6) = *(f_point + 6);
-      *(ftemp_point + 9 * (x_size - 1) + 7) = *(f_point + 7);
+      *(ftemp_point - 9 * (x_size + 1) + 7) = *(f_point + 7);
+      *(ftemp_point + 9 * (x_size - 1) + 6) = *(f_point + 6);
       gtemp_point = g_temp + j*x_size*9+ 9*(x_size-1);
       *(gtemp_point - 9 + 3) =*(g_point+3);
-      *(gtemp_point - 9 * (x_size + 1) + 6) =*(g_point + 6);
-      *(gtemp_point + 9 * (x_size - 1) + 7) =*(g_point + 7);
+      *(gtemp_point - 9 * (x_size + 1) + 7) =*(g_point + 7);
+      *(gtemp_point + 9 * (x_size - 1) + 6) =*(g_point + 6);
     }
 
     // x1 - right:
@@ -703,92 +716,93 @@ int main(int argc, char **argv)
       ftemp_point = f_temp + x1*9 + j*x_size*9;
       f_point = f + x1*9 + j*x_size*9;
       *(ftemp_point - 9 + 3) = *(f_point + 3);
-      *(ftemp_point - 9 * (x_size + 1) + 6) = *(f_point+6);
-      *(ftemp_point + 9 * (x_size - 1) + 7) = *(f_point+7);
+      *(ftemp_point - 9 * (x_size + 1) + 7) = *(f_point+7);
+      *(ftemp_point + 9 * (x_size - 1) + 6) = *(f_point+6);
       gtemp_point = g_temp + x1*9 + j*x_size*9;
       *(gtemp_point - 9 + 3) =*(g_point + 3);
-      *(gtemp_point - 9 * (x_size + 1) + 6) =*(g_point+6);
-      *(gtemp_point + 9 * (x_size - 1) + 7) =*(g_point+7);
+      *(gtemp_point - 9 * (x_size + 1) + 7) =*(g_point+7);
+      *(gtemp_point + 9 * (x_size - 1) + 6) =*(g_point+6);
     }
     for (int j = y2+1; j < y_size-1; ++j){
       ftemp_point = f_temp + x1*9 + j*x_size*9;
       f_point = f + x1*9 + j*x_size*9;
       *(ftemp_point - 9 + 3) = *(f_point + 3);
-      *(ftemp_point - 9 * (x_size + 1) + 6) = *(f_point+6);
-      *(ftemp_point + 9 * (x_size - 1) + 7) = *(f_point+7);
+      *(ftemp_point - 9 * (x_size + 1) + 7) = *(f_point+7);
+      *(ftemp_point + 9 * (x_size - 1) + 6) = *(f_point+6);
       ftemp_point = g_temp + x1*9 + j*x_size*9;
       *(ftemp_point - 9 + 3) =*(g_point + 3);
-      *(ftemp_point - 9 * (x_size + 1) + 6) =*(g_point+6);
-      *(ftemp_point + 9 * (x_size - 1) + 7) =*(g_point+7);
+      *(ftemp_point - 9 * (x_size + 1) + 7) =*(g_point+7);
+      *(ftemp_point + 9 * (x_size - 1) + 6) =*(g_point+6);
     }
     // x2 - left:
     for (int j = 1; j < y1; ++j){
       ftemp_point = f_temp + x2*9 + j*x_size*9;
       f_point = f + x2*9 + j*x_size*9;
       *(ftemp_point + 9 + 1) = *(f_point + 1);
-      *(ftemp_point - 9 * (x_size - 1) + 5) = *(f_point+5);
-      *(ftemp_point + 9 * (x_size + 1) + 8) = *(f_point+8);
+      *(ftemp_point - 9 * (x_size - 1) + 8) = *(f_point+8);
+      *(ftemp_point + 9 * (x_size + 1) + 5) = *(f_point+5);
       ftemp_point = g_temp + x2*9 + j*x_size*9;
       *(ftemp_point + 9 + 1) =*(g_point + 1);
-      *(ftemp_point - 9 * (x_size - 1) + 5) =*(g_point+5);
-      *(ftemp_point + 9 * (x_size + 1) + 8) =*(g_point+8);
+      *(ftemp_point - 9 * (x_size - 1) + 8) =*(g_point+8);
+      *(ftemp_point + 9 * (x_size + 1) + 5) =*(g_point+5);
     }
     for (int j = y2+1; j < y_size-1; ++j){
       ftemp_point = f_temp + x2*9 + j*x_size*9;
       f_point = f + x2*9 + j*x_size*9;
       *(ftemp_point + 9 + 1) = *(f_point + 1);
-      *(ftemp_point - 9 * (x_size - 1) + 5) = *(f_point+5);
-      *(ftemp_point + 9 * (x_size + 1) + 8) = *(f_point+8);
+      *(ftemp_point - 9 * (x_size - 1) + 8) = *(f_point+8);
+      *(ftemp_point + 9 * (x_size + 1) + 5) = *(f_point+5);
       ftemp_point = g_temp + x2*9 + j*x_size*9;
       *(ftemp_point + 9 + 1) =*(g_point + 1);
-      *(ftemp_point - 9 * (x_size - 1) + 5) =*(g_point+5);
-      *(ftemp_point + 9 * (x_size + 1) + 8) =*(g_point+8);
+      *(ftemp_point - 9 * (x_size - 1) + 8) =*(g_point+8);
+      *(ftemp_point + 9 * (x_size + 1) + 5) =*(g_point+5);
     }
 
 
     //
     // mirroring:
     //
-    // left-top:
+    // left-bot:
     ftemp_point = f_temp;
     f_point = f;
     feq_point = f_eq;
-    *(f_point+8) = *(f_point+6);
-    // x2-top:
+    *(f_point+5) = *(f_point+7);
+    // x2-bot:
     ftemp_point = f_temp + x2*9;
     f_point = f + x2*9;
     feq_point = f_eq + x2*9;
-    *(f_point+8) =  *(f_point+6);
-    // x1-top
+    *(f_point+5) =  *(f_point+7);
+    // x1-bot
     ftemp_point = f_temp + x1*9;
     f_point = f + x1*9;
     feq_point = f_eq + x1*9;
-    *(f_point + 7) = *(f_point+5);
-    // right-top
+    *(f_point + 6) = *(f_point+8);
+    // right-bot
     ftemp_point = f_temp + x_size*9 - 9;
     f_point = f + x_size*9 - 9;
     feq_point = f_eq + x_size*9 - 9;
-    *(f_point + 7) =  *(f_point+5);
-    // left-bot:
+    *(f_point + 6) =  *(f_point+8);
+
+    // left-top:
     ftemp_point = f_temp + (y_size-1)*x_size*9;
     f_point = f + (y_size-1)*x_size*9;
     feq_point = f_eq + (y_size-1)*x_size*9;
-    *(f_point+5) =  *(f_point+7);
-    // x2-bot:
+    *(f_point+8) =  *(f_point+6);
+    // x2-top:
     ftemp_point = f_temp + (y_size-1)*x_size*9 + x2*9;
     f_point = f + (y_size-1)*x_size*9 + x2*9;
     feq_point = f_eq + (y_size-1)*x_size*9 + x2*9;
-    *(f_point+5) =  *(f_point+7);
-    // x1-bot:
+    *(f_point+8) =  *(f_point+6);
+    // x1-top:
     ftemp_point = f_temp + (y_size-1)*x_size*9 + x1*9;
     f_point = f + (y_size-1)*x_size*9 + x1*9;
     feq_point = f_eq +(y_size-1)*x_size*9 + x1*9;
-    *(f_point+6) =  *(f_point+8);
+    *(f_point+7) =  *(f_point+5);
     // right-bot:
     ftemp_point = f_temp + (y_size-2)*x_size*9 + x_size*9 - 9;
     f_point = f + (y_size-1)*x_size*9 + x_size*9 - 9;
     feq_point = f_eq+ (y_size-1)*x_size*9 + x_size*9 - 9;
-    *(f_point+6) = *(f_point+8);
+    *(f_point+7) = *(f_point+5);
     //
     // left and right
     //
@@ -869,101 +883,102 @@ int main(int argc, char **argv)
 
 
     //
-    // top
+    // bot
     //
     for (int i=1; i<x1; ++i){
       ftemp_point = f_temp + i*9;
       f_point = f + i*9;
       feq_point = f_eq + i*9;
-      bal = (1-a)*(*(ftemp_point+2) + *(ftemp_point+5) + *(ftemp_point+6))/(*(feq_point+4)+*(feq_point+8)+*(feq_point+7));
-      *(f_point+4)=a**(ftemp_point+2);
-      *(f_point+8)=a**(ftemp_point+5);
-      *(f_point+7)=a**(ftemp_point+6);
-      *(f_point+4)+=bal * *(feq_point+4);
-      *(f_point+8)+=bal * *(feq_point+8);
-      *(f_point+7)+=bal * *(feq_point+7);
+      bal = (1-a)*(*(ftemp_point+4) + *(ftemp_point+8) + *(ftemp_point+7))/(*(feq_point+2)+*(feq_point+5)+*(feq_point+6));
+      *(f_point+2)=a**(ftemp_point+4);
+      *(f_point+5)=a**(ftemp_point+8);
+      *(f_point+6)=a**(ftemp_point+7);
+      *(f_point+2)+=bal * *(feq_point+2);
+      *(f_point+5)+=bal * *(feq_point+5);
+      *(f_point+6)+=bal * *(feq_point+6);
     }
     for (int i=x1; i<=x2; ++i){
       ftemp_point = f_temp + i*9 + 9*x_size*y1; //?
       f_point = f + i*9 + 9*x_size*y1;
       feq_point = f_eq  + i*9 + 9*x_size*y1;
-      bal = (1-a)*(*(ftemp_point+2) + *(ftemp_point+5) + *(ftemp_point+6))/(*(feq_point+4)+*(feq_point+8)+*(feq_point+7));
-      *(f_point+4)=a**(ftemp_point+2);
-      *(f_point+8)=a**(ftemp_point+5);
-      *(f_point+7)=a**(ftemp_point+6);
-      *(f_point+4)+=bal * *(feq_point+4);
-      *(f_point+8)+=bal * *(feq_point+8);
-      *(f_point+7)+=bal * *(feq_point+7);
+      bal = (1-a)*(*(ftemp_point+4) + *(ftemp_point+8) + *(ftemp_point+7))/(*(feq_point+2)+*(feq_point+5)+*(feq_point+6));
+      *(f_point+2)=a**(ftemp_point+4);
+      *(f_point+5)=a**(ftemp_point+8);
+      *(f_point+6)=a**(ftemp_point+7);
+      *(f_point+2)+=bal * *(feq_point+2);
+      *(f_point+5)+=bal * *(feq_point+5);
+      *(f_point+6)+=bal * *(feq_point+6);
     }
     for (int i=x2+1; i<x_size-1; ++i){
       ftemp_point = f_temp + i*9;
       f_point = f + i*9;
       feq_point = f_eq + i*9;
-      bal = (1-a)*(*(ftemp_point+2) + *(ftemp_point+5) + *(ftemp_point+6))/(*(feq_point+4)+*(feq_point+8)+*(feq_point+7));
-      *(f_point+4)=a**(ftemp_point+2);
-      *(f_point+8)=a**(ftemp_point+5);
-      *(f_point+7)=a**(ftemp_point+6);
-      *(f_point+4)+=bal * *(feq_point+4);
-      *(f_point+8)+=bal * *(feq_point+8);
-      *(f_point+7)+=bal * *(feq_point+7);
+      bal = (1-a)*(*(ftemp_point+4) + *(ftemp_point+8) + *(ftemp_point+7))/(*(feq_point+2)+*(feq_point+5)+*(feq_point+6));
+      *(f_point+2)=a**(ftemp_point+4);
+      *(f_point+5)=a**(ftemp_point+8);
+      *(f_point+6)=a**(ftemp_point+7);
+      *(f_point+2)+=bal * *(feq_point+2);
+      *(f_point+5)+=bal * *(feq_point+5);
+      *(f_point+6)+=bal * *(feq_point+6);
     }
 
 
     //
-    // bottom
+    // top
     //
     for (int i=1; i<x1; ++i){
       ftemp_point = f_temp  +(y_size-1)*x_size*9+ i*9;
       f_point = f +(y_size-1)*x_size*9+ i*9;
       feq_point = f_eq +(y_size-1)*x_size*9+ i*9;
-      bal = (1-a)*(*(ftemp_point+4) + *(ftemp_point+8) + *(ftemp_point+7))/(*(feq_point+2)+*(feq_point+5)+*(feq_point+6));
+      bal = (1-a)*(*(ftemp_point+2) + *(ftemp_point+5) + *(ftemp_point+6))/(*(feq_point+4)+*(feq_point+7)+*(feq_point+8));
       // transfer
-      *(f_point+2) = a**(ftemp_point+4);
-      *(f_point+5) = a**(ftemp_point+8);
-      *(f_point+6) = a**(ftemp_point+7);
-      *(f_point+2)+=bal * *(feq_point+2);
-      *(f_point+5)+=bal * *(feq_point+5);
-      *(f_point+6)+=bal * *(feq_point+6);
+      *(f_point+4) = a**(ftemp_point+4);
+      *(f_point+7) = a**(ftemp_point+6);
+      *(f_point+8) = a**(ftemp_point+5);
+      *(f_point+4)+=bal * *(feq_point+4);
+      *(f_point+7)+=bal * *(feq_point+7);
+      *(f_point+8)+=bal * *(feq_point+8);
     }
     for (int i=x1; i<=x2; ++i){
       ftemp_point = f_temp  + y2*x_size*9+ i*9;
       f_point = f +y2*x_size*9+ i*9;
       feq_point = f_eq +y2*x_size*9+ i*9;
-      bal = (1-a)*(*(ftemp_point+4) + *(ftemp_point+8) + *(ftemp_point+7))/(*(feq_point+2)+*(feq_point+5)+*(feq_point+6));
+      bal = (1-a)*(*(ftemp_point+2) + *(ftemp_point+5) + *(ftemp_point+6))/(*(feq_point+4)+*(feq_point+7)+*(feq_point+8));
       // transfer
-      *(f_point+2) =a* *(ftemp_point+4);
-      *(f_point+5) = a**(ftemp_point+8);
-      *(f_point+6) =a**(ftemp_point+7);
-      *(f_point+2)+=bal * *(feq_point+2);
-      *(f_point+5)+=bal * *(feq_point+5);
-      *(f_point+6)+=bal * *(feq_point+6);
+      *(f_point+4) = a**(ftemp_point+4);
+      *(f_point+7) = a**(ftemp_point+6);
+      *(f_point+8) = a**(ftemp_point+5);
+      *(f_point+4)+=bal * *(feq_point+4);
+      *(f_point+7)+=bal * *(feq_point+7);
+      *(f_point+8)+=bal * *(feq_point+8);
     }
     for (int i=x2+1; i<x_size-1; ++i){
       ftemp_point = f_temp + i*9 + (y_size-1)*(x_size)*9;
       f_point = f + i*9 + (y_size-1)*(x_size)*9;
       feq_point = f_eq  + i*9 + (y_size-1)*(x_size)*9;
-      bal = (1-a)*(*(ftemp_point+4) + *(ftemp_point+8) + *(ftemp_point+7))/(*(feq_point+2)+*(feq_point+5)+*(feq_point+6));
-      *(f_point+2) = a**(ftemp_point+4);
-      *(f_point+5) = a**(ftemp_point+8);
-      *(f_point+6) =a**(ftemp_point+7);
-      *(f_point+2)+=bal * *(feq_point+2);
-      *(f_point+5)+=bal * *(feq_point+5);
-      *(f_point+6)+=bal * *(feq_point+6);
+      bal = (1-a)*(*(ftemp_point+2) + *(ftemp_point+5) + *(ftemp_point+6))/(*(feq_point+4)+*(feq_point+7)+*(feq_point+8));
+      // transfer
+      *(f_point+4) = a**(ftemp_point+4);
+      *(f_point+7) = a**(ftemp_point+6);
+      *(f_point+8) = a**(ftemp_point+5);
+      *(f_point+4)+=bal * *(feq_point+4);
+      *(f_point+7)+=bal * *(feq_point+7);
+      *(f_point+8)+=bal * *(feq_point+8);
     }
     // Inside corners:
 
     // x2-y1:
     ftemp_point = f_temp + x2*9 + y1*x_size*9;
     f_point = f + x2*9+ y1*x_size*9;
-    *(f_point+8) = *(f_point+6);
-    // x1-y1
-    ftemp_point = f_temp + x1*9 +y1*9*x_size;
-    f_point = f + x1*9 + y1*9*x_size;
+    *(f_point+5) = *(f_point+7);
+    // x1-y2
+    ftemp_point = f_temp + x1*9 +y2*9*x_size;
+    f_point = f + x1*9 + y2*9*x_size;
     *(f_point + 7) = *(f_point+5);
     // x2-y2:
     ftemp_point = f_temp + y2*x_size*9 + x2*9;
     f_point = f + y2*x_size*9 + x2*9;
-    *(f_point+5) = *(f_point+7);
+    *(f_point+8) = *(f_point+6);
     // x1-y1:
     ftemp_point = f_temp + y1*x_size*9 + x1*9;
     f_point = f + y1*x_size*9 + x1*9;
@@ -1120,6 +1135,12 @@ int main(int argc, char **argv)
       macro_vel(vel_point, f_point, rho_point[i][j], T[i][j]);
       T[i][j] =  macro_temp(g_point, rho_point[i][j],vel_point);
       P[i][j] = rho_point[i][j]*T[i][j];
+      qx[i][j]=0;
+      qy[i][j]=0;
+      for (int k = 0; k<9; ++k) {
+          qx[i][j] += (e[k][0] - *vel_point)*(e[k][0] - *vel_point) / 2. * *(f_point+k) * e[k][0];
+          qy[i][j] += (e[k][0] - *vel_point)*(e[k][1] - *vel_point) / 2. * *(f_point+k) * e[k][1];
+      }
     }
   }
   for (int j = 1; j < y_size-1; ++j){
@@ -1131,6 +1152,12 @@ int main(int argc, char **argv)
       macro_vel(vel_point, f_point, rho_point[i][j], T[i][j]);
       T[i][j] = macro_temp(g_point, rho_point[i][j],vel_point);
       P[i][j] = rho_point[i][j]*T[i][j];
+      qx[i][j]=0;
+      qy[i][j]=0;
+      for (int k = 0; k<9; ++k) {
+          qx[i][j] += (e[k][0] - *vel_point)*(e[k][0] - *vel_point) / 2. * *(f_point+k) * e[k][0];
+          qy[i][j] += (e[k][0] - *vel_point)*(e[k][1] - *vel_point) / 2. * *(f_point+k) * e[k][1];
+      }
     }
   }
   for (int j = y1+1; j < y2; ++j){
@@ -1142,6 +1169,12 @@ int main(int argc, char **argv)
       macro_vel(vel_point, f_point, rho_point[i][j], T[i][j]);
       T[i][j] = macro_temp(g_point, rho_point[i][j],vel_point);
       P[i][j] = rho_point[i][j]*T[i][j];
+      qx[i][j]=0;
+      qy[i][j]=0;
+      for (int k = 0; k<9; ++k) {
+          qx[i][j] += (e[k][0] - *vel_point)*(e[k][0] - *vel_point) / 2. * *(f_point+k) * e[k][0];
+          qy[i][j] += (e[k][0] - *vel_point)*(e[k][1] - *vel_point) / 2. * *(f_point+k) * e[k][1];
+      }
     }
   }
   for (int j=1; j<y_size-1; j++)
