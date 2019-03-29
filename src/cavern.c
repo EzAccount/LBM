@@ -28,7 +28,7 @@ double omega(double temperature, double rho)
 {
   //double nu = mu_powerlow(temperature)/dx/dx*dt; //*dx*dx/dt;
   double tau;
-  tau = sqrt(3*3.1415 / 8) /rho* Kn*(x_size-2)*pow(temperature, 0.71) + 0.5;
+  tau = sqrt(3*3.1415 / 8) /rho* Kn*(x_size-2)*pow(temperature, 0.21) + 0.5;
   return 1./tau;
 
   // Check Palabos wiki, models, boundary review.
