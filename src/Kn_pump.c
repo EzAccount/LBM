@@ -9,7 +9,7 @@
 double e[9][2];            // basic
 const int x_size = 202;     // points among x
 const int y_size = 52;     // points among y
-int h = 7;
+int h = 3;
 const double R = 8.31/0.04; //
 const double gam = 1.66;   //
 double dx = 1;
