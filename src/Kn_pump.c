@@ -9,7 +9,7 @@
 double e[9][2];            // basic
 const int x_size = 202;     // points among x
 const int y_size = 52;     // points among y
-int h = 7;
+int h = 3;
 const double R = 8.31/0.04; //
 const double gam = 1.66;   //
 double dx = 1;
@@ -32,7 +32,7 @@ double mu_other(double temperature){
 double omega(double temperature, double rho)
 {
   double tau;
-  tau = sqrt(3*3.1415 / 8) / rho * Kn * (2*h+1) * pow(temperature, 0.21) + 0.5; //full width
+  tau = sqrt(3*3.1415 / 8) / rho * Kn * h * pow(temperature, 0.21) + 0.5; //full width
   return 1./tau;
 }
 double omega_g(double temperature, double rho)
@@ -173,8 +173,8 @@ int main(int argc, char **argv)
   int random;
   int time = 50;// steps in time
   double a = 0; // a = 0 for Maxwell and a = 1 for mirror
-  double T1 = 0.6; // Left temperature
-  double T2 = 1.0;
+  double T1 = 1.0; // Left temperature
+  double T2 = 2.0;
   double P1 = 1.0;
   double P2 = 1.0;
   if (argc > 2){
